@@ -1,0 +1,30 @@
+# Risk register
+
+Ranked by severity, then critical-path urgency. All are open until the listed gate has evidence. Severity is engineering impact, not a claim that a defect currently exists in an application; there is no application yet.
+
+| Rank | Severity | Risk / consequence | Planned control and closing evidence | Gate |
+| --- | --- | --- | --- | --- |
+| 1 | Critical | Wrong tenant or payee capture is refunded | Session-derived tenant; composite FKs; configured merchant allowlist; verify order/capture/payee/amount/currency; negative tests on same-tenant wrong order and cross-tenant access | M2 |
+| 2 | Critical | Duplicate or excess refund after double approval, concurrency or timeout | Unique case decision and decision operation; durable request key/payload; capture lock and reservations; ledger uniqueness; restart/concurrent-connection tests | M2b/M5 |
+| 3 | Critical | Idempotency retention expires while refund ID remains unknown | Do not assume indefinite dedupe or lookup-by-request-ID; record first send; confirm endpoint retention; disable automatic POST replay until known; hold reservation/manual investigation when uncertain | M2b |
+| 4 | Critical | UI claims money returned when PayPal has not completed it | Separate local/provider states; validate resource identity and amounts; verify completed refund; tests for pending, 5xx, malformed response, missing fields and crash after send | M2b/M5 |
+| 5 | Critical | Customer loses entitlement through cheaper policy/AI recommendation | AI observations only; human eligibility review; compare equivalent allowed choices; exact partial consent; return receipt gates; explicit manual review on uncertainty | M2b/M3 |
+| 6 | High | Forged/replayed/out-of-order webhook changes payment state | Signature verification before durable dedupe; event/resource validation; re-query authoritative state; replay and processing-crash tests; real sandbox webhook evidence | M2b/M5 |
+| 7 | High | Dashboard-side refunds or unknown external activity invalidate local balance | Canonical ProviderRefund ledger; fresh verification; freeze on unexplained totals/status; no assumed capture refund-list endpoint; test externally discovered refunds and conservative blocks | M5 |
+| 8 | High | No real sandbox flow before deadline | Build payment slice first; request local config only at M2; record actual IDs and re-fetch; halt advancement if capture/refund remains mocked | M2 |
+| 9 | High | Auth bypass, leaked customer tokens or CSRF authorizes a financial action | Expiring hashed purpose-bound capabilities, DB sessions, ADMIN approval, origin/CSRF checks, rate limits, redaction and cross-tenant browser/API tests | M1/M2 |
+| 10 | High | Secrets enter source, logs, browser or demo recording | Narrow client DTOs, server-only adapters, ignored env, fake examples, redaction, bundle/source/log review; public client ID distinguished from secret | Every milestone |
+| 11 | High | No working DB / toolchain delays integration | Docker CLI exists but service is stopped; no psql found on PATH; use dedicated PostgreSQL, pin compatible packages, run real constraint/concurrency tests | M1 |
+| 12 | High | Monetary parsing, overflows or currency mismatch corrupt decisions | BigInt minor units, strict decimal-string parser, USD allowlist/ceiling, signed modeled cost only; property/negative tests and DB checks | M1/M3 |
+| 13 | High | Code returns before external operation is durably recorded | DB commit before I/O; leased operations; no fire-and-forget work; restart reconciliation; audit/ledger settlement in same DB transaction | M2b/M5 |
+| 14 | High | Prompt injection or invalid AI output is treated as payment authority | Restricted schema, runtime validation, no payment tools, cache versioning, failure/manual path and adversarial fixtures; measure live evaluation separately | M4 |
+| 15 | High | AG Studio proxy leaks key/data or is an arbitrary expensive API relay | Authenticated scoped projection, model/tool allowlist, bounded payload/rate/usage, no arbitrary SQL or provider URL, read-only server tools | M6 |
+| 16 | High | Scope misses the deadline or sponsor claims exceed work | Payment-first gates; optional images/multi-currency deferred; functional Studio evidence; reproducible setup alternative to hosting; explicit known limitations | M7 |
+| 17 | Medium | SDK/plugin guidance is absent, outdated or adds unexpected files | APIMatic not found in inspected project/global locations or tool catalog; inspect installer/version/license and generated diff later; cross-check official methods; no unverified SDK method names | M2a |
+| 18 | Medium | Studio package mismatch, SSR failure or license prevents hosted demo | Match Studio packages and supported Grid/Charts; client wrapper; build/browser spike; verify permitted hosting/license before deployment | M6 |
+| 19 | Medium | Untrusted images cause private-data exposure or unsafe fetches | Defer images initially; later private storage, byte/MIME/dimension limits, signature checks, metadata stripping and no arbitrary image URLs | Optional image increment |
+| 20 | Medium | Stale quotes, consent or policy are reused after case edits | Immutable versions/hashes, bounded expiry, atomic consumption, approval-time recheck and fresh customer acceptance when offer changes | M3 |
+| 21 | Medium | Model/API/version unavailable or costly | Explicit model ID/capability verification at integration, bounded calls, manual fallback; no claimed benchmark until measured | M4/M6 |
+| 22 | Medium | Reproducibility or judge access fails | Lockfile, migrations/seed, isolated test DB, preserved MIT license, fresh-install run, safe special-access instructions and no secrets committed | M7 |
+
+The essential unresolved external facts are sandbox account/app readiness, endpoint-specific request-ID retention, real webhook delivery/payloads, model access and Studio license entitlement. Public documentation review does not establish any of these account-specific facts. No external account was accessed in Phase 0.
