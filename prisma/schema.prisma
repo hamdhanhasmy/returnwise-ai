@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+enum TokenPurpose {
+  MERCHANT_LOGIN
+  CUSTOMER_INTAKE
+  CUSTOMER_TRACK
+}
+
+enum EstimateSource {
+  SIMULATED
+  MERCHANT_ESTIMATE
+}
+
+enum OrderOrigin {
+  SIMULATED
+  PAYPAL_SANDBOX
+}
+
+enum ClaimReason {
+  DAMAGED
+  NOT_AS_DESCRIBED
+  WRONG_ITEM
+  OTHER
+  UNKNOWN
+}
+
+enum CaseStatus {
+  MANUAL_REVIEW
+  PENDING
+  AWAITING_CUSTOMER
+  AWAITING_RETURN
+  APPROVED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ActorType {
+  USER
+  CUSTOMER
+  SYSTEM
+}
+
+model Merchant {
+  id                  String           @id @default(uuid()) @db.Uuid
+  name                String
+  sandboxAccountAlias String
+  paypalMerchantId    String?          @unique
+  paymentsEnabled     Boolean          @default(false)
+  createdAt           DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime         @updatedAt @db.Timestamptz(3)
+  users               User[]
+  policies            MerchantPolicy[]
+  products            Product[]
+  orders              Order[]
+  cases               ReturnCase[]
+  sessions            Session[]
+  tokens              AccessToken[]
+  audit               AuditLog[]
+}
+
+model User {
+  id         String    @id @default(uuid()) @db.Uuid
+  merchantId String    @db.Uuid
+  email      String
+  role       UserRole
+  disabledAt DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @db.Timestamptz(3)
+  merchant   Merchant  @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  sessions   Session[]
+  tokens     AccessToken[]
+  audit      AuditLog[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, email])
+}
+
+model Session {
+  id         String    @id @default(uuid()) @db.Uuid
+  merchantId String    @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique @db.Char(64)
+  expiresAt  DateTime  @db.Timestamptz(3)
+  revokedAt  DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @db.Timestamptz(3)
+  merchant   Merchant  @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  user       User      @relation(fields: [merchantId, userId], references: [merchantId, id], onDelete: Restrict)
+
+  @@unique([merchantId, id])
+  @@index([expiresAt])
+}
+
+model AccessToken {
+  id         String       @id @default(uuid()) @db.Uuid
+  merchantId String       @db.Uuid
+  purpose    TokenPurpose
+  tokenHash  String       @unique @db.Char(64)
+  userId     String?      @db.Uuid
+  orderId    String?      @db.Uuid
+  caseId     String?      @db.Uuid
+  expiresAt  DateTime     @db.Timestamptz(3)
+  consumedAt DateTime?    @db.Timestamptz(3)
+  revokedAt  DateTime?    @db.Timestamptz(3)
+  createdAt  DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime     @updatedAt @db.Timestamptz(3)
+  merchant   Merchant     @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  user       User?        @relation(fields: [merchantId, userId], references: [merchantId, id], onDelete: Restrict)
+  order      Order?       @relation(fields: [merchantId, orderId], references: [merchantId, id], onDelete: Restrict)
+  returnCase ReturnCase?  @relation(fields: [merchantId, caseId, orderId], references: [merchantId, id, orderId], onDelete: Restrict)
+
+  @@unique([merchantId, id])
+  @@index([expiresAt])
+  @@index([merchantId, orderId])
+}
+
+model MerchantPolicy {
+  id                         String     @id @default(uuid()) @db.Uuid
+  merchantId                 String     @db.Uuid
+  version                    Int
+  effectiveAt                DateTime   @db.Timestamptz(3)
+  retiredAt                  DateTime?  @db.Timestamptz(3)
+  returnWindowDays            Int
+  eligibleCategories         String[]
+  allowKeepWithoutReturn     Boolean
+  allowPartialKeep           Boolean
+  requireReturnReceipt       Boolean
+  manualReviewThresholdMinor BigInt
+  currency                   String     @db.Char(3)
+  termsVersion               String
+  rulesJson                  Json
+  createdAt                  DateTime   @default(now()) @db.Timestamptz(3)
+  merchant                   Merchant   @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  cases                      ReturnCase[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, version])
+}
+
+model Product {
+  id                 String         @id @default(uuid()) @db.Uuid
+  merchantId         String         @db.Uuid
+  sku                String
+  name               String
+  category           String
+  currency           String         @db.Char(3)
+  saleAmountMinor    BigInt
+  recoveryValueMinor BigInt
+  estimateSource     EstimateSource @default(SIMULATED)
+  version            Int            @default(0)
+  createdAt          DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime       @updatedAt @db.Timestamptz(3)
+  merchant           Merchant       @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  orders             Order[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, sku])
+}
+
+model Order {
+  id                String       @id @default(uuid()) @db.Uuid
+  merchantId        String       @db.Uuid
+  publicOrderNumber String
+  productId         String       @db.Uuid
+  productSnapshot   Json
+  customerRef       String
+  currency          String       @db.Char(3)
+  totalMinor        BigInt
+  origin            OrderOrigin  @default(SIMULATED)
+  purchasedAt       DateTime?    @db.Timestamptz(3)
+  deliveredAt       DateTime?    @db.Timestamptz(3)
+  version           Int          @default(0)
+  createdAt         DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
+  merchant          Merchant     @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  product           Product      @relation(fields: [merchantId, productId], references: [merchantId, id], onDelete: Restrict)
+  cases             ReturnCase[]
+  tokens            AccessToken[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, publicOrderNumber])
+  @@index([merchantId, createdAt])
+}
+
+model ReturnCase {
+  id               String       @id @default(uuid()) @db.Uuid
+  merchantId       String       @db.Uuid
+  orderId          String       @db.Uuid
+  policyId         String       @db.Uuid
+  reason           ClaimReason
+  description      String
+  customerClaim    Json
+  status           CaseStatus   @default(MANUAL_REVIEW)
+  evidenceRevision Int          @default(0)
+  version          Int          @default(0)
+  createdAt        DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
+  merchant         Merchant     @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  order            Order        @relation(fields: [merchantId, orderId], references: [merchantId, id], onDelete: Restrict)
+  policy           MerchantPolicy @relation(fields: [merchantId, policyId], references: [merchantId, id], onDelete: Restrict)
+  tokens           AccessToken[]
+  audit            AuditLog[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, id, orderId])
+  @@index([merchantId, status, createdAt])
+  @@index([merchantId, orderId])
+}
+
+model AuditLog {
+  id                   String     @id @default(uuid()) @db.Uuid
+  merchantId           String     @db.Uuid
+  actorType            ActorType
+  actorUserId          String?   @db.Uuid
+  caseId               String?   @db.Uuid
+  action               String
+  correlationId        String
+  redactedMetadataJson Json
+  createdAt            DateTime   @default(now()) @db.Timestamptz(3)
+  merchant             Merchant   @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  actor                User?      @relation(fields: [merchantId, actorUserId], references: [merchantId, id], onDelete: Restrict)
+  returnCase           ReturnCase? @relation(fields: [merchantId, caseId], references: [merchantId, id], onDelete: Restrict)
+
+  @@unique([merchantId, id])
+  @@index([merchantId, caseId, createdAt])
+  @@index([merchantId, createdAt])
+}

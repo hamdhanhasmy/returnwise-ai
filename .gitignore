@@ -145,5 +145,12 @@ vite.config.ts.timestamp-*
 # Astro generated types
 .astro/
 
+# Local PostgreSQL, credentials and test artifacts
+.local/
+src/generated/
+playwright-report/
+test-results/
+artifacts/
+
 # Turbo Repo
 .turbo
