@@ -31,7 +31,7 @@ export function CasesTable({ cases }: { cases: CaseRow[] }) {
     <div className="overflow-x-auto">
       <table className="w-full min-w-150 text-left text-xs">
         <caption className="sr-only">
-          Return cases from this merchant&apos;s synthetic seed data
+          Return cases belonging to this merchant
         </caption>
         <thead className="border-y bg-muted/40 text-[10px] tracking-wide text-muted-foreground uppercase">
           <tr>
@@ -67,19 +67,36 @@ export function CasesTable({ cases }: { cases: CaseRow[] }) {
                     <p className="font-medium">{item.order.product.name}</p>
                     <p className="mt-1 text-[10px] text-muted-foreground">
                       {item.order.publicOrderNumber}{" "}
-                      <span aria-hidden="true">·</span> Synthetic
+                      <span aria-hidden="true">·</span>{" "}
+                      {item.order.origin === "SIMULATED"
+                        ? "Synthetic"
+                        : "Sandbox"}
                     </p>
                   </div>
                 </div>
               </td>
               <td className="px-4 py-4 text-muted-foreground">
                 {item.reason.toLowerCase().replaceAll("_", " ")}
+                <p className="mt-1">
+                  {item.condition?.toLowerCase() ?? "Condition unknown"}
+                </p>
               </td>
               <td className="px-4 py-4 font-medium tabular-nums">
                 {formatUsd(item.order.totalMinor)}
               </td>
               <td className="px-4 py-4">
                 <StatusBadge status={item.status} />
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  {item.recommendation?.toLowerCase().replaceAll("_", " ") ??
+                    "Human review"}{" "}
+                  · {item.priority}
+                </p>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  {item.submittedAt
+                    ? item.submittedAt.toISOString().slice(0, 10) + " UTC"
+                    : "Historical date unverified"}{" "}
+                  · {item.id.slice(0, 8)}
+                </p>
               </td>
               <td className="px-6 py-4 text-right">
                 <Link

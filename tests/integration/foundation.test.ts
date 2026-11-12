@@ -34,6 +34,27 @@ async function adminPrincipal() {
 }
 
 describe("PostgreSQL identity and tenant constraints", () => {
+  it("stores actual UTC instants rather than only round-tripping local wall time", async () => {
+    const instant = new Date("2026-11-09T16:30:00.123Z");
+    const record = await db.auditLog.create({
+      data: {
+        merchantId: demoIds.merchant,
+        actorType: "SYSTEM",
+        action: "UTC_TIMESTAMP_REGRESSION",
+        correlationId: randomUUID(),
+        createdAt: instant,
+        redactedMetadataJson: {},
+      },
+    });
+    const [stored] = await db.$queryRaw<{ zone: string; epoch: number }[]>`
+      SELECT current_setting('TimeZone') AS zone,
+             (extract(epoch from "createdAt") * 1000)::double precision AS epoch
+      FROM "AuditLog" WHERE id = ${record.id}::uuid
+    `;
+    expect(stored?.zone).toBe("UTC");
+    expect(stored?.epoch).toBe(instant.getTime());
+    expect(record.createdAt.toISOString()).toBe(instant.toISOString());
+  });
   it("seeds idempotently and stores only token hashes", async () => {
     const before = await db.returnCase.count();
     await seedDatabase(db);

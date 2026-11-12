@@ -34,9 +34,16 @@ enum ClaimReason {
   WRONG_ITEM
   OTHER
   UNKNOWN
+  DEFECTIVE
+  MISSING_COMPONENTS
+  CHANGE_OF_MIND
 }
 
 enum CaseStatus {
+  REFUND_AUTHORIZED
+  REFUND_PROCESSING
+  REFUND_PENDING
+  REFUND_FAILED
   MANUAL_REVIEW
   PENDING
   AWAITING_CUSTOMER
@@ -45,6 +52,11 @@ enum CaseStatus {
   PROCESSING
   COMPLETED
   FAILED
+  SUBMITTED
+  EVALUATED
+  RESOLUTION_PROPOSED
+  REJECTED
+  CLOSED
 }
 
 enum ActorType {
@@ -69,6 +81,13 @@ model Merchant {
   sessions            Session[]
   tokens              AccessToken[]
   audit               AuditLog[]
+  payments            Payment[]
+  checkoutOperations  CheckoutOperation[]
+  refundApprovals     RefundApproval[]
+  refundOperations    RefundOperation[]
+  providerRefunds     ProviderRefund[]
+  webhookEvents       WebhookEvent[]
+  analyticsQueries    AnalyticsQuery[]
 }
 
 model User {
@@ -83,6 +102,8 @@ model User {
   sessions   Session[]
   tokens     AccessToken[]
   audit      AuditLog[]
+  refundApprovals RefundApproval[]
+  analyticsQueries AnalyticsQuery[]
 
   @@unique([merchantId, id])
   @@unique([merchantId, email])
@@ -142,12 +163,16 @@ model MerchantPolicy {
   currency                   String     @db.Char(3)
   termsVersion               String
   rulesJson                  Json
+  usage                      String     @default("PAYMENT")
+  returnRules                Json?
   createdAt                  DateTime   @default(now()) @db.Timestamptz(3)
   merchant                   Merchant   @relation(fields: [merchantId], references: [id], onDelete: Restrict)
   cases                      ReturnCase[]
+  refundApprovals            RefundApproval[]
 
   @@unique([merchantId, id])
   @@unique([merchantId, version])
+  @@index([merchantId, usage, version(sort: Desc)], map: "MerchantPolicy_return_versions")
 }
 
 model Product {
@@ -182,6 +207,7 @@ model Order {
   origin            OrderOrigin  @default(SIMULATED)
   purchasedAt       DateTime?    @db.Timestamptz(3)
   deliveredAt       DateTime?    @db.Timestamptz(3)
+  timingProvenance   String       @default("UNVERIFIED")
   version           Int          @default(0)
   createdAt         DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime     @updatedAt @db.Timestamptz(3)
@@ -189,6 +215,7 @@ model Order {
   product           Product      @relation(fields: [merchantId, productId], references: [merchantId, id], onDelete: Restrict)
   cases             ReturnCase[]
   tokens            AccessToken[]
+  payment           Payment?
 
   @@unique([merchantId, id])
   @@unique([merchantId, publicOrderNumber])
@@ -205,6 +232,12 @@ model ReturnCase {
   customerClaim    Json
   status           CaseStatus   @default(MANUAL_REVIEW)
   evidenceRevision Int          @default(0)
+  workflowVersion  Int          @default(0)
+  submittedAt      DateTime?    @db.Timestamptz(3)
+  condition        String?
+  policySnapshot   Json?
+  recommendation   String?
+  priority         String       @default("NORMAL")
   version          Int          @default(0)
   createdAt        DateTime     @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime     @updatedAt @db.Timestamptz(3)
@@ -213,11 +246,178 @@ model ReturnCase {
   policy           MerchantPolicy @relation(fields: [merchantId, policyId], references: [merchantId, id], onDelete: Restrict)
   tokens           AccessToken[]
   audit            AuditLog[]
+  evaluations      ReturnEvaluation[]
+  proposals        ReturnProposal[]
+  evidence         ReturnEvidence[]
+  analyses         EvidenceAnalysis[]
+  aiConsentVersion String?
+  aiConsentAt      DateTime? @db.Timestamptz(3)
+  aiReviewRequired Boolean @default(false)
+  returnReceivedAt DateTime? @db.Timestamptz(3)
+  returnReceivedBy String? @db.Uuid
+  returnReceiptNote String?
+  refundApproval RefundApproval?
 
   @@unique([merchantId, id])
   @@unique([merchantId, id, orderId])
   @@index([merchantId, status, createdAt])
   @@index([merchantId, orderId])
+}
+
+model ReturnEvidence {
+  id String @id @default(uuid()) @db.Uuid
+  merchantId String @db.Uuid
+  caseId String @db.Uuid
+  contentHash String @db.Char(64)
+  image Bytes?
+  inferenceImage Bytes?
+  storageProvider String @default("DATABASE")
+  storageState String @default("READY")
+  storageKey String? @unique
+  inferenceStorageKey String? @unique
+  storageBytes Int @default(0)
+  width Int
+  height Int
+  bytes Int
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+  returnCase ReturnCase @relation(fields:[merchantId,caseId],references:[merchantId,id],onDelete:Restrict)
+  @@unique([caseId,contentHash])
+  @@index([merchantId,caseId,createdAt])
+  @@index([expiresAt])
+}
+
+model EvidenceAnalysis {
+  id String @id @default(uuid()) @db.Uuid
+  merchantId String @db.Uuid
+  caseId String @db.Uuid
+  evidenceRevision Int
+  evidenceHash String @db.Char(64)
+  cacheKey String @unique @db.Char(64)
+  model String
+  promptVersion String
+  detail String
+  status String
+  result Json?
+  errorCode String?
+  reviewedAt DateTime? @db.Timestamptz(3)
+  reviewedBy String? @db.Uuid
+  reviewNote String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  returnCase ReturnCase @relation(fields:[merchantId,caseId],references:[merchantId,id],onDelete:Restrict)
+  attempts AnalysisAttempt[]
+  @@unique([merchantId,id])
+  @@index([merchantId,caseId,createdAt])
+}
+
+model AiBudget {
+  id String @id
+  spentNano BigInt @default(0)
+  reservedNano BigInt @default(0)
+  blocked Boolean @default(false)
+  attempts AnalysisAttempt[]
+  analyticsQueries AnalyticsQuery[]
+}
+
+// Read-only analytics tool-selection requests, sharing the evidence spending cap.
+model AnalyticsQuery {
+  id String @id @default(uuid()) @db.Uuid
+  merchantId String @db.Uuid
+  requestedByUserId String @db.Uuid
+  budgetId String
+  cacheKey String @unique @db.Char(64)
+  questionHash String @db.Char(64)
+  snapshotHash String @db.Char(64)
+  model String
+  promptVersion String
+  status String
+  reservationNano BigInt
+  estimatedNano BigInt?
+  costBasis String
+  pricingVersion String
+  promptTokens Int?
+  cachedTokens Int?
+  completionTokens Int?
+  latencyMs Int?
+  toolName String?
+  result Json?
+  errorCode String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  budget AiBudget @relation(fields: [budgetId], references: [id], onDelete: Restrict, map: "AnalyticsQuery_budget_fkey")
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict, map: "AnalyticsQuery_merchant_fkey")
+  requestedBy User @relation(fields: [merchantId, requestedByUserId], references: [merchantId, id], onDelete: Restrict, map: "AnalyticsQuery_user_fkey")
+  @@index([merchantId, createdAt])
+}
+
+model AnalysisAttempt {
+  id String @id @default(uuid()) @db.Uuid
+  merchantId String @db.Uuid
+  analysisId String @db.Uuid
+  budgetId String
+  sequence Int
+  status String
+  reservationNano BigInt
+  estimatedNano BigInt?
+  costBasis String
+  pricingVersion String
+  promptTokens Int?
+  cachedTokens Int?
+  completionTokens Int?
+  providerModel String?
+  providerRequestId String?
+  latencyMs Int?
+  errorCode String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  analysis EvidenceAnalysis @relation(fields:[merchantId,analysisId],references:[merchantId,id],onDelete:Restrict)
+  budget AiBudget @relation(fields:[budgetId],references:[id],onDelete:Restrict)
+  @@unique([analysisId,sequence])
+  @@index([merchantId,createdAt])
+}
+
+model ReturnEvaluation {
+  id           String @id @default(uuid()) @db.Uuid
+  merchantId   String @db.Uuid
+  caseId       String @db.Uuid
+  caseVersion  Int
+  logicVersion String
+  inputHash    String @db.Char(64)
+  inputs       Json
+  result       Json
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  returnCase   ReturnCase @relation(fields: [merchantId, caseId], references: [merchantId, id], onDelete: Restrict)
+  proposals    ReturnProposal[]
+
+  @@unique([merchantId, id, caseId])
+  @@unique([caseId, caseVersion])
+  @@index([merchantId, caseId, createdAt])
+}
+
+model ReturnProposal {
+  id             String @id @default(uuid()) @db.Uuid
+  merchantId     String @db.Uuid
+  caseId         String @db.Uuid
+  evaluationId   String @db.Uuid
+  resolution     String
+  amountMinor    BigInt
+  currency       String @db.Char(3)
+  termsHash      String @db.Char(64)
+  explanation    String
+  status         String @default("PROPOSED")
+  requiresConsent Boolean
+  expiresAt      DateTime @db.Timestamptz(3)
+  respondedAt    DateTime? @db.Timestamptz(3)
+  approvedAt     DateTime? @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  returnCase     ReturnCase @relation(fields: [merchantId, caseId], references: [merchantId, id], onDelete: Restrict)
+  evaluation     ReturnEvaluation @relation(fields: [merchantId, evaluationId, caseId], references: [merchantId, id, caseId], onDelete: Restrict)
+  refundApproval RefundApproval?
+
+  @@unique([merchantId,id,caseId])
+  @@index([merchantId, caseId, createdAt])
 }
 
 model AuditLog {
@@ -226,6 +426,8 @@ model AuditLog {
   actorType            ActorType
   actorUserId          String?   @db.Uuid
   caseId               String?   @db.Uuid
+  paymentId            String?   @db.Uuid
+  refundOperationId    String?   @db.Uuid
   action               String
   correlationId        String
   redactedMetadataJson Json
@@ -233,8 +435,220 @@ model AuditLog {
   merchant             Merchant   @relation(fields: [merchantId], references: [id], onDelete: Restrict)
   actor                User?      @relation(fields: [merchantId, actorUserId], references: [merchantId, id], onDelete: Restrict)
   returnCase           ReturnCase? @relation(fields: [merchantId, caseId], references: [merchantId, id], onDelete: Restrict)
+  payment              Payment? @relation(fields: [merchantId, paymentId], references: [merchantId, id], onDelete: Restrict)
+  refundOperation      RefundOperation? @relation(fields: [merchantId, refundOperationId], references: [merchantId, id], onDelete: Restrict)
 
   @@unique([merchantId, id])
   @@index([merchantId, caseId, createdAt])
   @@index([merchantId, createdAt])
+  @@index([merchantId, paymentId, createdAt])
+}
+
+enum PaymentStatus {
+  CREATING
+  AWAITING_APPROVAL
+  CAPTURE_PENDING
+  CAPTURED
+  PARTIALLY_REFUNDED
+  REFUNDED
+  CANCELLED
+  FAILED
+  NEEDS_RECONCILIATION
+}
+
+enum LedgerState {
+  UNVERIFIED
+  RECONCILED
+  FROZEN
+}
+
+enum CheckoutKind {
+  CREATE_ORDER
+  CAPTURE_ORDER
+}
+
+enum OperationStatus {
+  PENDING
+  PROCESSING
+  PROVIDER_PENDING
+  NEEDS_RECONCILIATION
+  COMPLETED
+  FAILED_FINAL
+  CANCELLED
+}
+
+enum ReservationState {
+  HELD
+  SETTLED
+  RELEASED
+}
+
+model Payment {
+  id                   String @id @default(uuid()) @db.Uuid
+  merchantId           String @db.Uuid
+  orderId              String @unique @db.Uuid
+  checkoutKey          String @db.Uuid
+  paypalOrderId        String? @unique
+  paypalCaptureId      String? @unique
+  expectedPayeeId      String
+  expectedAmountMinor  BigInt
+  captureAmountMinor   BigInt?
+  currency             String @db.Char(3)
+  status               PaymentStatus @default(CREATING)
+  orderProviderStatus  String?
+  captureProviderStatus String?
+  captureCompletedAt   DateTime? @db.Timestamptz(3)
+  lastVerifiedAt       DateTime? @db.Timestamptz(3)
+  ledgerState          LedgerState @default(UNVERIFIED)
+  reconciliationReason String?
+  leaseOwner           String? @db.Uuid
+  leaseUntil           DateTime? @db.Timestamptz(3)
+  version              Int @default(0)
+  createdAt            DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @db.Timestamptz(3)
+  merchant             Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  order                Order @relation(fields: [merchantId, orderId], references: [merchantId, id], onDelete: Restrict)
+  checkoutOperations   CheckoutOperation[]
+  refundApprovals       RefundApproval[]
+  refundOperations     RefundOperation[]
+  providerRefunds      ProviderRefund[]
+  audit                AuditLog[]
+  webhookEvents        WebhookEvent[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, checkoutKey])
+  @@unique([merchantId, orderId])
+  @@index([merchantId, status, createdAt])
+}
+
+model CheckoutOperation {
+  id             String @id @default(uuid()) @db.Uuid
+  merchantId     String @db.Uuid
+  paymentId      String @db.Uuid
+  kind           CheckoutKind
+  requestId      String @unique @db.Uuid
+  requestPayload Json
+  requestHash    String @db.Char(64)
+  status         OperationStatus @default(PENDING)
+  firstSentAt    DateTime? @db.Timestamptz(3)
+  attemptCount   Int @default(0)
+  lastErrorCode  String?
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+  merchant       Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  payment        Payment @relation(fields: [merchantId, paymentId], references: [merchantId, id], onDelete: Restrict)
+
+  @@unique([merchantId, id])
+  @@unique([paymentId, kind])
+  @@index([status, updatedAt])
+}
+
+// Phase 2 explicit sandbox refund terms; future case quotes must not bypass these gates.
+model RefundApproval {
+  caseId                 String? @unique @db.Uuid
+  proposalId             String? @unique @db.Uuid
+  caseBinding            Json?
+  @@unique([merchantId,caseId])
+  @@unique([merchantId,proposalId,caseId])
+  returnCase             ReturnCase? @relation(fields:[merchantId,caseId],references:[merchantId,id],onDelete:Restrict)
+  proposal               ReturnProposal? @relation(fields:[merchantId,proposalId,caseId],references:[merchantId,id,caseId],onDelete:Restrict)
+  id                     String @id @default(uuid()) @db.Uuid
+  merchantId             String @db.Uuid
+  paymentId              String @db.Uuid
+  policyId               String @db.Uuid
+  requestedByUserId      String @db.Uuid
+  amountMinor            BigInt
+  currency               String @db.Char(3)
+  reason                 String
+  termsHash              String @db.Char(64)
+  requiresConsent        Boolean
+  consentTokenHash       String? @unique @db.Char(64)
+  consentedAt            DateTime? @db.Timestamptz(3)
+  eligibilityConfirmedAt DateTime? @db.Timestamptz(3)
+  approvedAt             DateTime? @db.Timestamptz(3)
+  expiresAt              DateTime @db.Timestamptz(3)
+  createdAt              DateTime @default(now()) @db.Timestamptz(3)
+  merchant               Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  payment                Payment @relation(fields: [merchantId, paymentId], references: [merchantId, id], onDelete: Restrict)
+  policy                 MerchantPolicy @relation(fields: [merchantId, policyId], references: [merchantId, id], onDelete: Restrict)
+  requestedBy            User @relation(fields: [merchantId, requestedByUserId], references: [merchantId, id], onDelete: Restrict)
+  operation              RefundOperation?
+
+  @@unique([merchantId, id, paymentId])
+  @@index([merchantId, paymentId, createdAt])
+}
+
+model RefundOperation {
+  id               String @id @default(uuid()) @db.Uuid
+  merchantId       String @db.Uuid
+  paymentId        String @db.Uuid
+  approvalId       String @unique @db.Uuid
+  amountMinor      BigInt
+  currency         String @db.Char(3)
+  requestId        String @unique @db.Uuid
+  requestPayload   Json
+  requestHash      String @db.Char(64)
+  status           OperationStatus @default(PENDING)
+  reservation      ReservationState @default(HELD)
+  candidateRefundId String? @unique
+  attemptCount     Int @default(0)
+  firstSentAt      DateTime? @db.Timestamptz(3)
+  retryNotAfter    DateTime? @db.Timestamptz(3)
+  lastErrorCode    String?
+  lastVerifiedAt  DateTime? @db.Timestamptz(3)
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+  merchant         Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  payment          Payment @relation(fields: [merchantId, paymentId], references: [merchantId, id], onDelete: Restrict)
+  approval         RefundApproval @relation(fields: [merchantId, approvalId, paymentId], references: [merchantId, id, paymentId], onDelete: Restrict)
+  providerRefund   ProviderRefund?
+  audit            AuditLog[]
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, id, paymentId])
+  @@index([merchantId, paymentId, reservation])
+  @@unique([merchantId, approvalId, paymentId])
+  @@index([status, updatedAt])
+}
+
+model ProviderRefund {
+  id                 String @id @default(uuid()) @db.Uuid
+  merchantId         String @db.Uuid
+  paymentId          String @db.Uuid
+  operationId        String? @unique @db.Uuid
+  paypalRefundId     String @unique
+  amountMinor        BigInt
+  currency           String @db.Char(3)
+  providerStatus     String
+  providerUpdatedAt  DateTime? @db.Timestamptz(3)
+  verifiedAt         DateTime @db.Timestamptz(3)
+  totalRefundedMinor BigInt?
+  external           Boolean @default(false)
+  merchant           Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  payment            Payment @relation(fields: [merchantId, paymentId], references: [merchantId, id], onDelete: Restrict)
+  operation          RefundOperation? @relation(fields: [merchantId, operationId, paymentId], references: [merchantId, id, paymentId], onDelete: Restrict)
+
+  @@unique([merchantId, id])
+  @@unique([merchantId, operationId, paymentId])
+  @@index([merchantId, paymentId])
+}
+
+model WebhookEvent {
+  id                  String @id
+  merchantId          String? @db.Uuid
+  paymentId           String? @db.Uuid
+  eventType           String
+  resourceId          String?
+  payloadHash         String @db.Char(64)
+  redactedResourceJson Json
+  verifiedAt          DateTime @db.Timestamptz(3)
+  receivedAt          DateTime @default(now()) @db.Timestamptz(3)
+  processedAt         DateTime? @db.Timestamptz(3)
+  leaseUntil          DateTime? @db.Timestamptz(3)
+  status              String @default("RECEIVED")
+  lastErrorCode       String?
+  merchant            Merchant? @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  payment             Payment? @relation(fields: [merchantId, paymentId], references: [merchantId, id], onDelete: Restrict)
+
+  @@index([status, receivedAt])
 }

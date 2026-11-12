@@ -2,6 +2,8 @@
 
 Version: 1.0 | Prepared for PayPal AI Hackathon, November 2026
 
+Implementation update (2026-11-10): the user's Phase 4 decision supersedes the proposed OpenAI runtime below. Evidence analysis now uses DeepSeek Flash vision with JSON mode plus strict Zod validation, explicit consent and a persistent application spending cap. OpenAI credentials are not required. Original planning text is retained for provenance; see `docs/phase-4-deepseek.md` for implemented behavior.
+
 ## 0. Mission and constraint
 
 Build an end-to-end, runnable, open-source **sandbox-only** merchant return-resolution application. A customer submits a problem with an order, an AI extracts evidence and summarizes the issue, a deterministic policy/cost engine compares authorized resolutions, the merchant approves one, and PayPal executes and verifies a full or partial refund against an original captured sandbox payment. AG Studio provides an interactive, AI-assisted analytics workspace. APIMatic's PayPal Context Plugin may guide API integration. The app must clearly distinguish **live PayPal sandbox events** from simulated business and shipping data.

@@ -1,5 +1,7 @@
 # Phase 1 review fix: isolated database tests
 
+Phase 2 extension: payment integration fixtures and browser payment fixtures use the same verified `testDatabase()` factory. Providers are injected mocks only in tests; browser server credentials are explicitly empty. Entry-point checks, read-only identity probes, guarded migrations and no-cleanup behavior are unchanged. See [Phase 2 verification](phase-2-verification.md) for current counts.
+
 ## Root cause
 
 The original npm integration wrapper validated `TEST_DATABASE_URL`, then replaced `DATABASE_URL` only in its child process. `foundation.test.ts` constructed `scriptDatabase()` at module evaluation with the default runtime URL. Direct Vitest or IDE execution bypassed the wrapper, so fixtures and auth/audit records could be written into development.

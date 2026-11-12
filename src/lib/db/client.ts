@@ -9,6 +9,8 @@ export function getDb() {
   if (!globalDb.returnwiseDb) {
     const adapter = new PrismaPg({
       connectionString: requireDatabaseUrl(),
+      // Match adapter-pg's UTC date serialization/normalization, independently of host locale.
+      options: "-c timezone=UTC",
       max: 5,
       connectionTimeoutMillis: 3000,
       statement_timeout: 5000,

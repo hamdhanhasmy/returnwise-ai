@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "publishedAt": "2026-11-12T10:54:03.398Z",
+  "provenance": "Reviewed fictional cases and sanitized snapshot of previously verified LOCAL Sandbox records. No provider operation is executed by this public demo; hosted PostgreSQL is separate.",
+  "cases": [
+    {
+      "slug": "damaged-bowl",
+      "claim": "Fictional damaged bowl; compare equivalent full remedies using configured estimates.",
+      "analysisUsage": {
+        "requests": 0,
+        "estimatedNano": "0"
+      },
+      "metric": {
+        "id": "damaged-bowl",
+        "reference": "SYNTHETIC-DAMAGED-BOWL",
+        "product": "Synthetic damaged bowl",
+        "category": "Home",
+        "source": "Synthetic scenario",
+        "status": "evaluated",
+        "reason": "damaged",
+        "resolution": "No approved resolution",
+        "recommendation": "full refund keep",
+        "day": "2026-11-10",
+        "dateProvenance": "Synthetic UTC scenario",
+        "aiStatus": "NOT_REQUESTED",
+        "evaluationVersion": "returns-v1",
+        "comparable": 1,
+        "physicalMinor": 9300,
+        "returnlessMinor": 8000,
+        "selectedMinor": 8000,
+        "avoidanceMinor": 1300,
+        "shippingMinor": 1800,
+        "handlingMinor": 700,
+        "recoveryMinor": 1200
+      },
+      "financial": {
+        "logicVersion": "returns-v1",
+        "manualReview": false,
+        "recommended": "FULL_REFUND_KEEP",
+        "options": [
+          {
+            "resolution": "FULL_REFUND_RETURN",
+            "totalMinor": "9300",
+            "shippingMinor": "1800",
+            "handlingMinor": "700",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "1200",
+            "refundMinor": "8000"
+          },
+          {
+            "resolution": "FULL_REFUND_KEEP",
+            "totalMinor": "8000",
+            "shippingMinor": "0",
+            "handlingMinor": "0",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "0",
+            "refundMinor": "8000"
+          },
+          {
+            "resolution": "PARTIAL_REFUND_KEEP",
+            "totalMinor": "2000",
+            "shippingMinor": "0",
+            "handlingMinor": "0",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "0",
+            "refundMinor": "2000"
+          }
+        ]
+      },
+      "assessment": null,
+      "payment": null
+    },
+    {
+      "slug": "recoverable-lamp",
+      "claim": "Fictional high-value recoverable lamp; a physical return can preserve value.",
+      "analysisUsage": {
+        "requests": 0,
+        "estimatedNano": "0"
+      },
+      "metric": {
+        "id": "recoverable-lamp",
+        "reference": "SYNTHETIC-RECOVERABLE-LAMP",
+        "product": "Synthetic recoverable lamp",
+        "category": "Home",
+        "source": "Synthetic scenario",
+        "status": "evaluated",
+        "reason": "wrong item",
+        "resolution": "No approved resolution",
+        "recommendation": "full refund return",
+        "day": "2026-11-10",
+        "dateProvenance": "Synthetic UTC scenario",
+        "aiStatus": "NOT_REQUESTED",
+        "evaluationVersion": "returns-v1",
+        "comparable": 1,
+        "physicalMinor": 8500,
+        "returnlessMinor": 24000,
+        "selectedMinor": 8500,
+        "avoidanceMinor": 0,
+        "shippingMinor": 1800,
+        "handlingMinor": 700,
+        "recoveryMinor": 18000
+      },
+      "financial": {
+        "logicVersion": "returns-v1",
+        "manualReview": false,
+        "recommended": "FULL_REFUND_RETURN",
+        "options": [
+          {
+            "resolution": "FULL_REFUND_RETURN",
+            "totalMinor": "8500",
+            "shippingMinor": "1800",
+            "handlingMinor": "700",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "18000",
+            "refundMinor": "24000"
+          },
+          {
+            "resolution": "FULL_REFUND_KEEP",
+            "totalMinor": "24000",
+            "shippingMinor": "0",
+            "handlingMinor": "0",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "0",
+            "refundMinor": "24000"
+          },
+          {
+            "resolution": "PARTIAL_REFUND_KEEP",
+            "totalMinor": "2000",
+            "shippingMinor": "0",
+            "handlingMinor": "0",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "0",
+            "refundMinor": "2000"
+          }
+        ]
+      },
+      "assessment": null,
+      "payment": null
+    },
+    {
+      "slug": "manual-review",
+      "claim": "Fictional ambiguous request; missing evidence requires human assessment.",
+      "analysisUsage": {
+        "requests": 0,
+        "estimatedNano": "0"
+      },
+      "metric": {
+        "id": "manual-review",
+        "reference": "SYNTHETIC-MANUAL-REVIEW",
+        "product": "Synthetic ambiguous textile",
+        "category": "Home",
+        "source": "Synthetic scenario",
+        "status": "manual review",
+        "reason": "other",
+        "resolution": "No approved resolution",
+        "recommendation": "Manual assessment",
+        "day": "2026-11-10",
+        "dateProvenance": "Synthetic UTC scenario",
+        "aiStatus": "NOT_REQUESTED",
+        "evaluationVersion": "returns-v1",
+        "comparable": 0,
+        "physicalMinor": null,
+        "returnlessMinor": null,
+        "selectedMinor": null,
+        "avoidanceMinor": null,
+        "shippingMinor": null,
+        "handlingMinor": null,
+        "recoveryMinor": null
+      },
+      "financial": {
+        "logicVersion": "returns-v1",
+        "manualReview": true,
+        "recommended": null,
+        "options": []
+      },
+      "assessment": null,
+      "payment": null
+    },
+    {
+      "slug": "verified-sandbox-bowl",
+      "claim": "Generated broken-bowl evidence used in the previously completed $5 Sandbox verification.",
+      "analysisUsage": {
+        "requests": 1,
+        "estimatedNano": "549168"
+      },
+      "metric": {
+        "id": "verified-sandbox-bowl",
+        "reference": "VERIFIED-5USD",
+        "product": "Fictional ceramic bowl — Phase 5 Sandbox demo",
+        "category": "Home",
+        "source": "Sandbox order",
+        "status": "closed",
+        "reason": "damaged",
+        "resolution": "full refund keep",
+        "recommendation": "full refund keep",
+        "day": "2026-11-11",
+        "dateProvenance": "Trusted UTC submission",
+        "aiStatus": "SUCCEEDED",
+        "evaluationVersion": "returns-v2-reviewed-evidence",
+        "comparable": 1,
+        "physicalMinor": 775,
+        "returnlessMinor": 500,
+        "selectedMinor": 500,
+        "avoidanceMinor": 275,
+        "shippingMinor": 200,
+        "handlingMinor": 100,
+        "recoveryMinor": 25
+      },
+      "financial": {
+        "logicVersion": "returns-v2-reviewed-evidence",
+        "manualReview": false,
+        "recommended": "FULL_REFUND_KEEP",
+        "options": [
+          {
+            "resolution": "FULL_REFUND_RETURN",
+            "totalMinor": "775",
+            "shippingMinor": "200",
+            "handlingMinor": "100",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "25",
+            "refundMinor": "500"
+          },
+          {
+            "resolution": "FULL_REFUND_KEEP",
+            "totalMinor": "500",
+            "shippingMinor": "0",
+            "handlingMinor": "0",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "0",
+            "refundMinor": "500"
+          },
+          {
+            "resolution": "PARTIAL_REFUND_KEEP",
+            "totalMinor": "200",
+            "shippingMinor": "0",
+            "handlingMinor": "0",
+            "disposalMinor": "0",
+            "processingMinor": "0",
+            "recoveryMinor": "0",
+            "refundMinor": "200"
+          }
+        ]
+      },
+      "assessment": {
+        "model": "deepseek-flash",
+        "promptVersion": "evidence-v1",
+        "status": "SUCCEEDED",
+        "result": {
+          "caseSummary": "Fictional demonstration claim that a ceramic bowl arrived broken into separated pieces with a chipped rim; the image is described as generated, not real customer evidence.",
+          "claimedIssue": "DAMAGED",
+          "visibleObservations": [
+            "A light-colored bowl is shown separated into two large pieces with irregular fractured edges.",
+            "A small detached fragment is visible near the lower edge of the larger piece.",
+            "The interior surfaces appear glossy; no packaging or shipping materials are shown."
+          ],
+          "evidenceLimitations": [
+            "The image is stated to be synthetic/generated and is not real customer evidence.",
+            "Photos cannot establish when, where, or how the breakage occurred.",
+            "No packaging, shipping label, or pre-shipment condition is visible.",
+            "Absence of visible chips elsewhere does not rule out additional or hidden damage."
+          ],
+          "possiblePolicyQuestions": [
+            "What evidence is required to substantiate an arrival-damage claim when submitted images are synthetic?"
+          ],
+          "uncertainty": "HIGH",
+          "claimSupport": "UNCLEAR",
+          "injectionSuspected": false,
+          "requiresHumanReview": true
+        }
+      },
+      "payment": {
+        "currency": "USD",
+        "capturedMinor": "500",
+        "refundedMinor": "500",
+        "captureReference": "…090213",
+        "ledgerState": "RECONCILED",
+        "refunds": [
+          {
+            "reference": "…238907",
+            "status": "COMPLETED",
+            "amountMinor": "500"
+          }
+        ]
+      }
+    }
+  ]
+}

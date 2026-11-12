@@ -1,0 +1,32 @@
+CREATE TABLE "AnalyticsQuery" (
+  "id" UUID NOT NULL,
+  "merchantId" UUID NOT NULL,
+  "requestedByUserId" UUID NOT NULL,
+  "budgetId" TEXT NOT NULL,
+  "cacheKey" CHAR(64) NOT NULL,
+  "questionHash" CHAR(64) NOT NULL,
+  "snapshotHash" CHAR(64) NOT NULL,
+  "model" TEXT NOT NULL,
+  "promptVersion" TEXT NOT NULL,
+  "status" TEXT NOT NULL,
+  "reservationNano" BIGINT NOT NULL CHECK ("reservationNano" > 0),
+  "estimatedNano" BIGINT CHECK ("estimatedNano" >= 0),
+  "costBasis" TEXT NOT NULL,
+  "pricingVersion" TEXT NOT NULL,
+  "promptTokens" INTEGER CHECK ("promptTokens" >= 0),
+  "cachedTokens" INTEGER CHECK ("cachedTokens" >= 0),
+  "completionTokens" INTEGER CHECK ("completionTokens" >= 0),
+  "latencyMs" INTEGER,
+  "toolName" TEXT,
+  "result" JSONB,
+  "errorCode" TEXT,
+  "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "completedAt" TIMESTAMPTZ(3),
+  CONSTRAINT "AnalyticsQuery_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "AnalyticsQuery_status" CHECK ("status" IN ('RESERVED','SUCCEEDED','FAILED','UNKNOWN')),
+  CONSTRAINT "AnalyticsQuery_user_fkey" FOREIGN KEY ("merchantId", "requestedByUserId") REFERENCES "User"("merchantId", "id") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "AnalyticsQuery_merchant_fkey" FOREIGN KEY ("merchantId") REFERENCES "Merchant"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT "AnalyticsQuery_budget_fkey" FOREIGN KEY ("budgetId") REFERENCES "AiBudget"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX "AnalyticsQuery_cacheKey_key" ON "AnalyticsQuery"("cacheKey");
+CREATE INDEX "AnalyticsQuery_merchantId_createdAt_idx" ON "AnalyticsQuery"("merchantId", "createdAt");

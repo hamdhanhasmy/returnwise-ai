@@ -20,6 +20,9 @@ import { CasesTable } from "@/components/cases-table";
 export default async function Dashboard() {
   const principal = await requirePrincipal();
   const overview = await merchantOverview(getDb(), principal);
+  const paymentCount = await getDb().payment.count({
+    where: { merchantId: principal.merchantId },
+  });
   const metrics = [
     {
       label: "Return cases",
@@ -85,8 +88,8 @@ export default async function Dashboard() {
               More considered decisions.
             </h2>
             <p className="mt-3 max-w-85 text-xs leading-5 text-[#52604e]">
-              Start with the facts. Explore the seeded cases while payment
-              execution and evidence analysis are being built.
+              Start with the facts. Explore illustrative cases and the dedicated
+              PayPal Sandbox checkout. Evidence analysis comes later.
             </p>
             <Link
               href="/cases"
@@ -122,7 +125,12 @@ export default async function Dashboard() {
               <p className="flex items-center gap-2 text-muted-foreground">
                 <span className="size-3.5 rounded-full border-2" /> PayPal
                 sandbox operations{" "}
-                <span className="ml-auto text-[10px]">Phase 2</span>
+                <Link
+                  href="/checkout"
+                  className="ml-auto text-[10px] underline"
+                >
+                  Open checkout
+                </Link>
               </p>
               <p className="flex items-center gap-2 text-muted-foreground">
                 <span className="size-3.5 rounded-full border-2" /> AI evidence
@@ -130,7 +138,9 @@ export default async function Dashboard() {
               </p>
             </div>
             <p className="mt-5 border-t pt-3 text-[10px] leading-4 text-muted-foreground">
-              No payments have been captured or refunded by this application.
+              {paymentCount === 0
+                ? "No payments have been captured or refunded by this application."
+                : `${paymentCount} Sandbox transaction records. Open Transactions for verified outcomes.`}
             </p>
           </CardContent>
         </Card>
@@ -157,9 +167,9 @@ export default async function Dashboard() {
           <strong className="font-medium text-foreground">
             A safe place to start.
           </strong>{" "}
-          All order values and return scenarios here are synthetic. Refund
-          approval, policy decisions, and AI analysis are unavailable in this
-          phase.
+          Return case scenarios here are synthetic. The separate Transactions
+          ledger records genuine Sandbox payment operations. Optional DeepSeek
+          observations require customer consent and human review.
         </p>
       </div>
     </>

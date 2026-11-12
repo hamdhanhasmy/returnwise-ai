@@ -1,0 +1,48 @@
+# Review the dashboard estimate: both resources MUST show Free/$0 before applying.
+# No disks, paid workers, cron, shell jobs, replicas, paid storage or automatic upgrades.
+services:
+  - type: web
+    name: returnwise-ai
+    runtime: node
+    plan: free
+    region: ohio
+    autoDeployTrigger: off
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
+    startCommand: npm run start:render
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.16.0
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: DATABASE_URL
+        sync: false # Private INTERNAL connection for returnwise_runtime, NOT the owner URL.
+      # start:render derives APP_BASE_URL from Render's assigned RENDER_EXTERNAL_URL.
+      - key: PAYPAL_ENV
+        value: sandbox
+      - key: EVIDENCE_STORAGE
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: EVIDENCE_STORAGE_CAP_BYTES
+        value: "104857600"
+      - key: PUBLIC_DEMO_ENABLED
+        value: "true"
+      - key: AI_ENABLED
+        value: "false"
+      - key: AI_SPENDING_CAP_USD
+        value: "0.25"
+      - key: AG_STUDIO_HOSTED_AUTHORIZED
+        value: "false"
+databases:
+  - name: returnwise-db
+    plan: free
+    region: ohio
+    databaseName: returnwise_hosted
+    user: returnwise_owner
+    postgresMajorVersion: "18"
+    ipAllowList: [] # Add only your operator IP temporarily for external migration.

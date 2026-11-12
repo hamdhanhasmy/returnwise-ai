@@ -1,0 +1,5 @@
+# Synthetic demonstration evidence
+
+`synthetic-broken-bowl.png` is an AI-generated fictional product image, created with the built-in image-generation tool on 2026-11-11. It is not a customer photograph or proof of a real damaged shipment. Upload it through the private customer portal with synthetic-case consent; never use it as evidence of an actual commercial claim. It is intentionally outside `public/`.
+
+Generation prompt: “Create one photorealistic synthetic product-return evidence image for a software hackathon demonstration. A small inexpensive unbranded ivory ceramic bowl on a plain light-grey tabletop, visibly broken into two large separated pieces with matching jagged ceramic fracture edges and a tiny chip nearby. Natural soft window lighting, ordinary handheld smartphone product photograph aesthetic, realistic ceramic glaze and thickness, sharp enough to inspect the damage, entire bowl and both pieces visible. No people, hands, packaging, text, logos, labels, personal information, dramatic effects or added objects. Landscape 4:3 composition. This image is generated fictional demonstration evidence, not an actual customer claim.”

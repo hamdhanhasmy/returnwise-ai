@@ -1,5 +1,59 @@
 # Architecture decision log
 
+## Phase 7A — strictly $0 hosted demo boundaries
+
+- Keep legacy evidence bytes intact; use private Supabase references for new hosted uploads. Durable PostgreSQL quota reservations precede object I/O, and uncertain uploads remain hidden/count against the cap. Authorize before retrieval/deletion; use the existing server proxy instead of exposing signed/public URLs. No external storage call occurs inside a case database transaction.
+- Public judges receive four deliberately allowlisted, sanitized published snapshots, separately labeled from the fresh hosted database. No public merchant login issuer, uploads, AI calls, mutation tools or financial actions. Do not seed fabricated provider records into the hosted ledger.
+- Render YAML explicitly selects only Free web/Postgres, no disk or paid job, no automatic deploys/upgrades. Run additive migrations privately from the operator machine; create a dedicated non-owner runtime role. Keep owner/test URLs off the hosted runtime. Free-plan expiry, idle/cold starts and quota suspension are documented instead of promising production availability.
+- A stored Studio key is not public-demo authorization. Hosted Studio requires both a licence and explicit permission confirmation; an honest ordinary-table fallback remains available without loading Studio. Preserve local evaluation and the existing authenticated analytics/agent implementation.
+
+## Phase 6 — AG Studio and read-only analytics, 2026-11-12
+
+- Native Studio edit/chat panels clip content at phone widths. Keep responsive report exploration on mobile and explicitly restrict layout editing and the optional assistant to desktop-sized windows (over 720px). Resizing remounts the workspace in view mode; no hidden mobile inference call is triggered.
+
+- Install matched Studio React/core 3.1.0, using its compatible Grid/Charts dependencies without framework upgrades. Use the actual Studio engine/widgets with client-only rendering, stable props, native layout editing and responsive view layouts. Browser session layouts are merchant-scoped; they never persist financial data.
+- Tenant-scoped read-only repeatable-read analytics performs complete financial/count aggregation and supplies a bounded 500-case chart cohort. Independent 25-row database pagination covers older cases. Monetary calculations remain BigInt; charts use safe integer USD cents. Known invalid/unreviewed snapshots and untrusted dates are excluded from the relevant metrics.
+- Agent Framework uses a documented custom runner rather than the sample OpenAI Responses adapter. DeepSeek selects one of six allowlisted read-only functions; empty arguments and strict output/usage validation are mandatory. Server-built aggregate answers avoid model-invented money. Native assistant opens in Studio edit mode after consent; no default built-in agent or payment tool is exposed.
+- Add AnalyticsQuery for durable deduplication, actor ownership, safe result/usage and shared AiBudget accounting. Do not store raw questions. Reserve before network I/O, account conservatively for unknown usage, never automatically replay a failed/unknown question, and limit six new questions/merchant/five minutes.
+- `NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY` is an intentionally public browser entitlement registered before React instance creation, separate from server-only provider secrets. Hosted use remains gated on licence entitlement and existing privacy/security deployment prerequisites. No Phase 7 work.
+
+## Phase 5 — case financial orchestration, 2026-11-11
+
+- Reuse RefundApproval/RefundOperation and the verified native PayPal provider. Unique immutable case/proposal bindings join policy/evaluation/terms/evidence revision/capture/receipt to the exact authorized amount. No second payment integration or customer-consent token flow for case refunds.
+- Lock case before payment; commit authorization/reservation before provider calls. Synchronize linked case status after payment lease release and on authorized reads. Only verified completion plus reconciled ledger closes a payment-backed approved case. Unknown results keep reservations and recover the original operation.
+- Merchant approval records a remedy; a separate final exact-amount confirmation executes it. Physical remedies additionally require receipt/inspection. Standalone transaction refund actions cannot bypass a modern return case. One financial approval per case is an intentional limit.
+- Logic `returns-v2-reviewed-evidence` snapshots observation context and review state. Human review can handle unavailable/uncertain AI independently; AI supplies no economics, rights determinations or financial commands. Additional customer information invalidates review/cache input.
+- Genuine demo setup uses a new $5 fictional bowl, generated evidence and explicit operator approval. Historical fully refunded records remain untouched. Modeled impact uses equivalent full remedies and excludes manual-review cases; no real savings or AG Studio integration is claimed.
+
+## Phase 4 — DeepSeek evidence and spending, 2026-11-11
+
+- User-selected DeepSeek Flash replaces the proposed OpenAI runtime. Native server fetch implements the documented compatible JSON interface, non-thinking mode and strict observation-only Zod validation; no SDK retry or OpenAI key. AI never writes amounts, policy, eligibility or PayPal actions.
+- Keep bounded normalized images privately in PostgreSQL for this single-instance prototype. Customer storage permission and versioned third-party processing consent are separate. Hashed case capabilities and merchant admin/tenant authorization govern every read/mutation. Expiry blocks access; scheduled physical cleanup and backup retention remain deployment responsibilities.
+- Preserve deterministic policy calculations and require documented human evidence review before proposing/approving. Evidence changes withdraw active proposals and invalidate in-flight output. Previous financial calculations are visibly marked pending evidence review.
+- Use one row-locked lifetime application budget in integer nano-USD, with reservations committed before network I/O. Persist immutable settled usage, actual token metadata and conservative versioned estimates. Unknown outcomes consume their reservation estimate; crashes retain held capacity. Only explicit 429 gets one bounded, separately reserved retry.
+- Cache/deduplicate by case, evidence/description hash, model/revision, prompt version and inference settings. Unchanged failed/unknown results also remain deduplicated; recovery never silently resubmits a potentially charged request. Tenant UI shows only its own usage.
+- Twenty genuine synthetic illustration requests validate integration, not real-photo accuracy. Independent review, real-photo evaluation, provider privacy review, retention scheduling and shared ingress limits remain deployment gates. See [Phase 4 report](phase-4-deepseek.md) and [evaluation](deepseek-evaluation.md). No Phase 5 or AG Studio work.
+
+## Phase 3 — deterministic return management, 2026-11-10
+
+- Reuse existing order, policy, case, capability and audit models. Add only immutable ReturnEvaluation and exact-terms ReturnProposal records. A policy purpose (`PAYMENT` / `RETURNS`) isolates new configuration from the verified standalone refund flow. Existing migrations and historical records remain intact.
+- Mark existing order timing `UNVERIFIED`; never blanket-shift mixed historical timestamps. New UTC-recorded purchases and explicit synthetic dates are distinguished. Return windows use purchase-to-submission UTC elapsed time, inclusive boundary. Unknown/future timing routes to review; standalone refund review also requires trusted provenance.
+- Persist immutable policy snapshots, input hashes, logic version and structured results. Rank equivalent permitted full-refund remedies using integer cents only. Optional partial offers require exact customer agreement and human rights review, and are never ranked against full-refund rights.
+- Use hashed single-use intake and reusable expiring case capabilities, fragment transport, explicit customer-safe projections, exact-origin JSON and bounded process-local limits. Administrator issuance requires recipient verification; shared ingress protection and delivery review precede public hosting.
+- Serialize intake on orders and workflow actions on cases with version checks. Approval additionally locks the payment row and rechecks current ledger/timing. No transaction spans a provider request; Phase 3 performs no provider request at all. Approval does not reserve money or call PayPal; later orchestration must revalidate everything.
+- Reuse the existing single-item order architecture and append-only audit history. Evidence uploads/AI/AG Studio stay deferred. Synthetic seed scenarios never create provider payment records and preserve existing settings on rerun.
+- Follow-up migration corrects the return-policy guard's DELETE return value so it preserves legacy PAYMENT-policy behavior while keeping return versions immutable. No data repair/reset is performed.
+
+
+## Phase 2.5 verification decisions — 2026-11-09
+
+- Force UTC database sessions in both runtime and script factories. Installed adapter-pg date serialization/normalization assumes UTC; the local Asia/Colombo default hid a 5.5-hour stored-instant discrepancy behind successful Date round trips. Assert actual epoch values in integration tests. Preserve historical data pending explicit timestamp review; do not apply an unreviewed blanket correction.
+
+- Preserve the fixed-Sandbox REST adapter and database isolation. Operator diagnostics perform OAuth/provider GETs and scoped database reads only, redacting references. Keep genuine financial smoke operations separate from CI and mock suites.
+- Use an optional merchant-scoped fictional $1.00 product. Do not lower existing prices, bypass consent/approval, or issue a new operation to hide an unknown result.
+- Apply APIMatic guidance to targeted review and a test proving financial intent is committed before provider I/O. Retain PayPal's documented `PayPal-Request-Id`; generic SDK examples are not authoritative for the adapter.
+- Expose only a bounded webhook relay on loopback port 3200 through the temporary tunnel. Preserve payload/signature headers and application status; strip cookies and keep the browser APP_BASE_URL local. Temporary URLs can expire: update the subscription before testing, and distinguish reachability from genuine signature verification.
+
 All entries dated 2026-11-08 are planning decisions, not claims of implementation. Changes require a new entry explaining the reason, tests and risks.
 
 | ID | Decision | Reason / consequence |
@@ -22,6 +76,16 @@ All entries dated 2026-11-08 are planning decisions, not claims of implementatio
 | ADR-016 | Reproducible local setup is a valid submission fallback | Official rules allow runnable instructions; hosting remains an explicit approval step. Studio hosting license is unresolved. |
 
 Detailed rationale and references: [architecture](architecture.md), [data model](data-model.md), [provider notes](provider-notes.md), [risks](risks.md).
+
+## Phase 2 implementation decisions — 2026-11-09
+
+- ADR-026: Official Sandbox JavaScript SDK v6 plus a typed REST adapter with fixed Sandbox host. Server-only OAuth tokens are cached with expiry skew. APIMatic remains unavailable in inspected plugin/tool locations; official references are recorded in Phase 2 evidence. No plugin contribution is claimed.
+- ADR-027: Persist immutable requests and UUID request IDs before sending. Canonical JSON hashes survive PostgreSQL jsonb key ordering. No automatic financial POST retry; read-only GETs retry at most once. Unknown creates without an ID require manual investigation; captures reconcile by order ID. Explicit refund replay uses the original key/payload within 24 hours, inside documented refund retention.
+- ADR-028: Per-payment leases and short row-locked transactions serialize local financial operations. Held reservations block new refunds; pending/unknown outcomes retain capacity. Mismatches and status regressions freeze the ledger. No transaction spans external calls. A dedicated Sandbox account and no out-of-band refunds are operating constraints: local locks cannot make the PayPal dashboard atomic with our database.
+- ADR-029: RefundApproval is the immutable payment-level review/consent entity, independent of future case-economics quotes. It binds amount, currency, reason, policy and requesting administrator. Partial refunds require expiring hashed-token buyer acceptance; every refund requires human eligibility attestation and active admin authorization. Future case recommendations must feed these controls. Standalone checkout supports sequential partial reviews, superseding ADR-005's proposed new-case-per-partial restriction for this slice.
+- ADR-030: Local merchant-binding CLI creates a new explicit fictional policy version, preserves existing policies and enables only the selected merchant. Additive migration replaces the temporary all-disabled constraint with a merchant-binding constraint; existing flags remain disabled. Test isolation is unchanged.
+- ADR-031: Webhook postback verification receives the full original parsed event and registered app ID. Store a canonical payload hash and redacted IDs. Financial state comes from authenticated GETs, never event status alone. Unique event IDs, leases and retryable unmatched events handle duplicate/out-of-order delivery. Simulator postback events are rejected. Early full-refund webhooks without a request reference retain reservations until same-key recovery identifies the refund.
+- ADR-032: Webhooks and explicit admin actions provide reconciliation; no scheduler/queue. Demo limit: 20 refund operations per capture. Independent payment review and genuine Sandbox evidence remain acceptance gates; implementation self-review is not independent `/review` sign-off.
 
 ## Phase 1 implementation decisions — 2026-11-08
 

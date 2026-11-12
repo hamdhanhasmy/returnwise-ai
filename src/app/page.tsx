@@ -1,4 +1,4 @@
 import { redirect } from "next/navigation";
 export default function Home() {
-  redirect("/dashboard");
+  redirect(process.env.PUBLIC_DEMO_ENABLED === "true" ? "/demo" : "/dashboard");
 }

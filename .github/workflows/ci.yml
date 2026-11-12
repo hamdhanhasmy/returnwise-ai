@@ -27,6 +27,10 @@ jobs:
       APP_BASE_URL: http://127.0.0.1:3000
       PAYPAL_ENV: sandbox
       NEXT_TELEMETRY_DISABLED: "1"
+      AI_ENABLED: "false"
+      DEEPSEEK_API_KEY: ""
+      PAYPAL_CLIENT_ID: ""
+      PAYPAL_CLIENT_SECRET: ""
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,6 +49,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run test:integration
+      - run: npx vitest run --config vitest.integration.config.ts
       - run: npm run build
       - run: npm run test:e2e:install -- --with-deps
       - run: npm run test:e2e

@@ -7,12 +7,16 @@ import {
   PackageOpen,
   Settings2,
   UsersRound,
+  CreditCard,
+  ReceiptText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/cases", label: "Return cases", icon: PackageOpen },
+  { href: "/checkout", label: "Demo checkout", icon: CreditCard },
+  { href: "/transactions", label: "Transactions", icon: ReceiptText },
   { href: "/portal", label: "Customer portal", icon: UsersRound },
   { href: "/analytics", label: "Analytics", icon: ChartNoAxesCombined },
   { href: "/settings", label: "Settings", icon: Settings2 },

@@ -20,7 +20,7 @@ export function AppShell({
       >
         Skip to content
       </a>
-      <aside className="border-b bg-card px-5 py-4 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-b-0 lg:px-5 lg:py-7">
+      <aside className="border-b bg-card px-5 py-4 lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-60 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-5 lg:py-7">
         <Link
           href="/dashboard"
           aria-label="ReturnWise home"
@@ -98,7 +98,7 @@ export function AppShell({
               only
             </span>
             <span className="hidden items-center gap-1 text-[11px] text-muted-foreground sm:flex">
-              <Check className="size-3" /> Foundation preview
+              <Check className="size-3" /> Sandbox workspace
             </span>
             <form className="lg:hidden" action="/api/auth/logout" method="post">
               <Button variant="ghost" size="icon" aria-label="Sign out">
@@ -115,7 +115,7 @@ export function AppShell({
         </main>
         <footer className="mx-5 flex flex-wrap items-center justify-between gap-2 border-t py-5 text-[10px] text-muted-foreground md:mx-9">
           <span>ReturnWise AI · Thoughtful returns, clearer decisions.</span>
-          <span>Phase 1 / Synthetic demonstration data</span>
+          <span>Fictional products / PayPal Sandbox only</span>
         </footer>
       </div>
     </div>

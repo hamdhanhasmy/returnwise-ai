@@ -1,6 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LoginForm } from "@/components/login-form";
+import Link from "next/link";
 
 export default async function LoginPage({
   searchParams,
@@ -58,6 +59,7 @@ export default async function LoginPage({
             </p>
           )}
           <LoginForm />
+          {process.env.PUBLIC_DEMO_ENABLED === "true" && <Link href="/demo" className="mt-5 block text-sm font-medium text-primary underline">Explore the read-only judge demo without signing in</Link>}
           <div className="mt-8 rounded-lg border bg-card p-4">
             <p className="flex items-center gap-2 text-xs font-medium">
               <ShieldCheck className="size-4 text-primary" /> Setting up
@@ -72,7 +74,7 @@ export default async function LoginPage({
             </p>
           </div>
           <p className="mt-6 text-[10px] text-muted-foreground">
-            Phase 1 foundation · Synthetic data · No payment operations
+            Fictional products · PayPal Sandbox only · Human authorization
           </p>
         </div>
       </section>

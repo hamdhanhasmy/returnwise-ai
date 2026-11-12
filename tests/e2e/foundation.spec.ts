@@ -88,7 +88,7 @@ test("signed-in navigation, tenant isolation, portal and sign-out work", async (
   const own = await page.request.get(`/api/cases/${demoIds.cases[0]}`);
   expect((await own.json()).totalMinor).toBe("8000");
   for (const [name, title] of [
-    ["Analytics", "Understand the bigger picture."],
+    ["Analytics", "Every return tells a bigger story."],
     ["Settings", "Your workspace, at a glance."],
     ["Customer portal", "A calmer start to every return."],
   ]) {
@@ -120,4 +120,69 @@ test("invalid login shows a useful error and does not authenticate", async ({
   await expect(
     page.getByRole("alert").filter({ hasText: "This link is invalid" }),
   ).toContainText("invalid, expired, or already used");
+});
+
+test("payment endpoints require authentication and reject cross-origin mutations", async ({
+  page,
+  request,
+}) => {
+  for (const path of ["/api/payments", `/api/payments/${demoIds.merchant}`]) {
+    expect(
+      (
+        await request.post(path, {
+          data: { action: "capture" },
+          headers: { origin: "http://127.0.0.1:3100" },
+        })
+      ).status(),
+    ).toBe(401);
+  }
+  await signIn(page);
+  expect(
+    (
+      await page.request.post("/api/payments", {
+        data: {},
+        headers: { origin: "https://evil.example" },
+      })
+    ).status(),
+  ).toBe(403);
+  expect(
+    (
+      await page.request.post("/api/payments", {
+        data: { productId: "bad", checkoutKey: "bad", amount: "0.01" },
+        headers: { origin: "http://127.0.0.1:3100" },
+      })
+    ).status(),
+  ).toBe(400);
+});
+test("unconfigured checkout is honest and transactions stay tenant scoped", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/checkout");
+  await expect(
+    page.getByRole("heading", { name: "Sandbox checkout is not enabled" }),
+  ).toBeVisible();
+  await expect(page.locator("paypal-button")).toHaveCount(0);
+  expect(
+    await page
+      .locator("body")
+      .evaluate((body) => body.scrollWidth <= body.clientWidth),
+  ).toBe(true);
+  await page.screenshot({
+    path: `artifacts/checkout-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await page.goto("/transactions");
+  await expect(
+    page.getByText("No matching Sandbox transactions.", { exact: false }),
+  ).toBeVisible();
+  await page.getByLabel("Search transactions").fill("unknown-provider-id");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(
+    page.getByText("No matching Sandbox transactions.", { exact: false }),
+  ).toBeVisible();
+  await page.goto(`/transactions/${demoIds.otherMerchant}`);
+  await expect(
+    page.getByRole("heading", { name: /not found|couldn.t find/i }),
+  ).toBeVisible();
 });

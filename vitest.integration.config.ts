@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   test: {
     environment: "node",
+    env: { EVIDENCE_STORAGE: "database", SUPABASE_SECRET_KEY: "" },
     include: ["tests/integration/**/*.test.ts"],
     fileParallelism: false,
     hookTimeout: 20000,

@@ -1,5 +1,46 @@
 # ReturnWise AI architecture proposal
 
+## Phase 7A public deployment boundary
+
+Render Free runs the existing Next.js server on 0.0.0.0/PORT, using a restricted same-region internal Render PostgreSQL login. Owner migrations run separately from the operator machine. Hosted uploads use private Supabase objects with scoped database references, durable byte reservations, metadata-stripped JPEG variants and tracked deletion; legacy PostgreSQL evidence remains intact. No persistent disk, paid worker, queue or hosted test database is required.
+
+Public `/demo` routes read only a reviewed static artifact containing four fictional/sanitized case snapshots and prior local verification evidence. They create no session, model request or payment, and never query private merchant records. `/api/demo/analytics` validates read-only filters; merchant APIs retain their existing auth/origin/tenant checks. Hosted Studio is gated on explicit licence permission and has an honestly labeled table fallback. See [strictly $0 deployment](phase-7a-deployment.md).
+
+## Phase 6 analytics boundary
+
+The implemented authenticated `/analytics` page embeds `ag-studio-react`/`ag-studio` 3.1.0 in a client-only boundary. A tenant-scoped read-only Prisma projection supplies sanitized case/economics data, complete verified-refund aggregates and explicit provenance. Studio's native data engine, charts/grids, filters and layout state operate locally; case links preserve existing authorization.
+
+Optional native Agent Framework chat uses a custom runner calling a same-origin administrator endpoint. One DeepSeek function-selection request chooses an allowlisted aggregate tool with empty arguments; the server computes exact results. Persistent AnalyticsQuery records share AiBudget reservations with evidence analysis. No customer evidence or provider API key reaches the analytics model, no tool can modify records, and no analytics path invokes PayPal. Details and verification status: [Phase 6 report](phase-6-analytics.md).
+
+## Phase 5 implemented connection (2026-11-11)
+
+The original planning baseline below is retained. The current evidence provider is DeepSeek; see [orchestration](phase-5-orchestration.md) for validation status and limitations.
+
+```mermaid
+flowchart TD
+  Customer[Scoped customer capability] --> Evidence[Private images and explicit DeepSeek consent]
+  Evidence --> AI[Budget-reserved schema-validated observations]
+  AI --> Human[Merchant evidence review]
+  Human --> Engine[Deterministic policy snapshot and integer economics]
+  Engine --> Proposal[Immutable exact proposal]
+  Proposal --> Consent{Acceptance required?}
+  Consent -->|Yes| Accept[Exact customer acceptance]
+  Consent -->|No| Approve[Merchant resolution approval]
+  Accept --> Approve
+  Approve --> Receipt{Physical return?}
+  Receipt -->|Yes| Inspect[Merchant receipt and inspection]
+  Receipt -->|No| Final[Separate exact refund confirmation]
+  Inspect --> Final
+  Final --> Binding[Case and payment locks: immutable approval binding]
+  Binding --> Existing[Existing durable refund reservation and request ID]
+  Existing --> PayPal[PayPal Sandbox refund outside DB transaction]
+  PayPal --> Verify[Existing authenticated retrieval and webhook reconciliation]
+  Verify -->|Verified completed| Closed[Case CLOSED and audit event]
+  Verify -->|Unknown or pending| Pending[Reservation retained; reconcile original operation]
+```
+
+AI has no payment tools or monetary authority. Customer acceptance and case approval alone do not execute payments. Receipt is separately recorded for physical returns. Only verified provider completion with reconciled ledger closes a payment-backed approved case.
+
 Planning baseline: 2026-11-08. This is a design, not an implemented or externally validated system. Read with [milestones](implementation-plan.md), [data model](data-model.md), [risks](risks.md), [configuration](environment.md), and [baseline checks](baseline.md).
 
 ## System boundaries

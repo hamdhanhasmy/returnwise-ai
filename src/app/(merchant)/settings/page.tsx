@@ -4,16 +4,26 @@ import { getMerchantSettings } from "@/server/services/merchant";
 import { PageHeading } from "@/components/page-heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PolicyForm } from "@/components/returns/policy-form";
+import {
+  returnPolicySchema,
+  conservativePolicy,
+} from "@/lib/returns/contracts";
 export default async function SettingsPage() {
   const principal = await requirePrincipal();
   const merchant = await getMerchantSettings(getDb(), principal);
   const policy = merchant.policies[0];
+  const returns = await getDb().merchantPolicy.findFirst({
+    where: { merchantId: principal.merchantId, usage: "RETURNS" },
+    orderBy: { version: "desc" },
+  });
+  const parsed = returnPolicySchema.safeParse(returns?.returnRules);
   return (
     <>
       <PageHeading
         eyebrow="Settings"
         title="Your workspace, at a glance."
-        description="Read-only configuration for the foundation. Policy editing and provider setup are not enabled."
+        description="Versioned return policies and merchant configuration. Sandbox account binding is managed by the local operator."
       />
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
@@ -36,6 +46,16 @@ export default async function SettingsPage() {
                 <dt className="text-xs text-muted-foreground">Environment</dt>
                 <dd className="mt-2">
                   <Badge>Sandbox only</Badge>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">
+                  Payment authorization
+                </dt>
+                <dd className="mt-1">
+                  {merchant.paymentsEnabled
+                    ? "Sandbox merchant enabled; provider verification required"
+                    : "Disabled — local Sandbox setup required"}
                 </dd>
               </div>
             </dl>
@@ -79,9 +99,17 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+      <div className="mt-8">
+        <PolicyForm
+          policy={parsed.success ? parsed.data : conservativePolicy}
+          version={returns?.version}
+          editable={principal.role === "ADMIN"}
+        />
+      </div>
       <p className="mt-6 text-xs leading-6 text-muted-foreground">
-        PayPal operations and AI requests are disabled in this version,
-        regardless of environment credentials.
+        PayPal operations require configured Sandbox credentials and an enabled
+        merchant. AI requests remain disabled. Provider outcomes are shown only
+        in Transactions.
       </p>
     </>
   );
