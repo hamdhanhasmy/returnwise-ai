@@ -1,5 +1,11 @@
 # ReturnWise AI progress
 
+## 2026-11-12 — judge “Try demo” entry
+
+Added a clear public homepage and “Try demo” buttons on homepage/sign-in, linking directly to the existing restricted dashboard. Files: `src/app/page.tsx`, `src/app/login/page.tsx`, existing public-demo browser coverage, README and decision/progress notes. No shared account, authentication bypass, database migration, provider call or financial permission change.
+
+Typecheck, zero-warning lint and production build passed; 158 unit tests, 107 isolated PostgreSQL integration tests and four targeted desktop/mobile public-demo browser tests passed. Extended existing browser coverage exercises both entry buttons, confirms no merchant session is granted and preserves unauthorized API rejection. Desktop/mobile homepage screenshots were visually inspected. Restricted tsx initialization was rerun with approved access. Playwright assertions passed but Windows teardown hung; after confirming PID/command/port, only the owned port-3100 test server was terminated and the command exited 0. Hosted update pending.
+
 ## 2026-11-12 — Phase 7A Free public deployment verified with limitations
 
 Implemented private Supabase evidence references with durable quota reservations, tracked deletion and preserved legacy PostgreSQL bytes; added an opt-in four-case read-only public snapshot and an honest AG Studio licence fallback. Genuine Supabase upload/private retrieval/fresh-client retrieval/public denial/deletion passed on the generated image, without PayPal/AI calls. The user-created Render Free PostgreSQL in Ohio now has eight additive migrations and one authorized merchant/admin. A dedicated runtime role was verified to have no schema/table creation, payment deletion/truncation, audit update or migration metadata access; hosted payment/refund ledgers remain empty. Private operator/runtime credentials are separated in ignored files.

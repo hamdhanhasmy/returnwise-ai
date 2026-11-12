@@ -2,6 +2,7 @@ import { ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { LoginForm } from "@/components/login-form";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function LoginPage({
   searchParams,
@@ -58,8 +59,19 @@ export default async function LoginPage({
               local sign-in link.
             </p>
           )}
+          {process.env.PUBLIC_DEMO_ENABLED === "true" && (
+            <div className="my-6 rounded-xl border bg-card p-4">
+              <p className="text-sm font-medium">Here to explore ReturnWise?</p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                Open the read-only judge dashboard. No account or sign-in link
+                needed.
+              </p>
+              <Button asChild className="mt-4 w-full">
+                <Link href="/demo">Try demo</Link>
+              </Button>
+            </div>
+          )}
           <LoginForm />
-          {process.env.PUBLIC_DEMO_ENABLED === "true" && <Link href="/demo" className="mt-5 block text-sm font-medium text-primary underline">Explore the read-only judge demo without signing in</Link>}
           <div className="mt-8 rounded-lg border bg-card p-4">
             <p className="flex items-center gap-2 text-xs font-medium">
               <ShieldCheck className="size-4 text-primary" /> Setting up

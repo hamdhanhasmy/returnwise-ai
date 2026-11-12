@@ -29,7 +29,28 @@ test("public judges explore sanitized cases and reports without authentication o
     )
       forbidden.push(r.url());
   });
-  await page.goto("/demo");
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "A clearer path for every return." }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("No sign-in required. Read-only judge dashboard."),
+  ).toBeVisible();
+  expect(
+    await page.locator("body").evaluate((b) => b.scrollWidth <= b.clientWidth),
+  ).toBe(true);
+  await page.screenshot({
+    path: `artifacts/try-demo-home-${test.info().project.name}.png`,
+    fullPage: true,
+  });
+  await page.getByRole("link", { name: "Try demo", exact: true }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  expect(
+    (await page.context().cookies()).some((c) => c.name === "rw_session"),
+  ).toBe(false);
+  await page.goto("/login");
+  await page.getByRole("link", { name: "Try demo", exact: true }).click();
+  await expect(page).toHaveURL(/\/demo$/);
   await expect(
     page.getByText("Public read-only demo · Sandbox only.", { exact: false }),
   ).toBeVisible();

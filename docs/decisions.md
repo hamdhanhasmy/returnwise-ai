@@ -2,6 +2,7 @@
 
 ## Phase 7A — strictly $0 hosted demo boundaries
 
+- The public homepage and merchant sign-in page offer “Try demo” as a direct link to the existing read-only `/demo`. It does not issue a session or bypass merchant authorization. The homepage observes the public-demo flag at request time; when disabled, normal authenticated dashboard routing is preserved.
 - Keep legacy evidence bytes intact; use private Supabase references for new hosted uploads. Durable PostgreSQL quota reservations precede object I/O, and uncertain uploads remain hidden/count against the cap. Authorize before retrieval/deletion; use the existing server proxy instead of exposing signed/public URLs. No external storage call occurs inside a case database transaction.
 - Public judges receive four deliberately allowlisted, sanitized published snapshots, separately labeled from the fresh hosted database. No public merchant login issuer, uploads, AI calls, mutation tools or financial actions. Do not seed fabricated provider records into the hosted ledger.
 - Render YAML explicitly selects only Free web/Postgres, no disk or paid job, no automatic deploys/upgrades. Run additive migrations privately from the operator machine; create a dedicated non-owner runtime role. Keep owner/test URLs off the hosted runtime. Free-plan expiry, idle/cold starts and quota suspension are documented instead of promising production availability.
