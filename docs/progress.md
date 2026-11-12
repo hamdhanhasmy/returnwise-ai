@@ -1,5 +1,9 @@
 # ReturnWise AI progress
 
+## 2026-11-12 — hosted operator login TLS correction
+
+The documented operator login command failed with Prisma P1010 when its stored external Render URL omitted sslmode. Read-only comparison verified that the same target succeeds through established TLS normalization and that the configured merchant/admin exists. The login CLI now reuses `renderOwnerUrl` for hosted operator connections, requires HTTPS and validates configuration before issuing a token; local login behavior remains unchanged. No hosted application redeployment or database migration is required. Typecheck/lint, 158 unit and 107 isolated integration tests passed. The corrected actual CLI generated a hosted one-use link, captured only in an ignored private local file; no token/URL was printed in tool output, and no financial/AI request occurred.
+
 ## 2026-11-12 — Phase 7 final hackathon release materials
 
 Prepared copy-ready Devpost content, a 2:50 / 354-word narrated video plan, full public/local judge instructions, actual sponsor evidence and unsent licence inquiry, $0 Neon continuity plan, submission checklist, refreshed README and four reviewed screenshots. No product, provider, schema, hosting-plan or database-cutover change. The public demo remains read-only; native local Studio and prior genuine provider evidence are clearly distinguished.

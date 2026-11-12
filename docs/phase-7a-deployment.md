@@ -117,6 +117,8 @@ node --env-file=.env.render --import tsx scripts/issue-login-link.ts --email=YOU
 
 Open the resulting one-use 15-minute fragment link privately, never in shared CI/deploy logs. `/demo` grants no merchant session. The initializer's admin UUID is not a customer capability. Authorized private data stays behind existing session/tenant guards.
 
+The login issuer now reuses the hosted operator TLS/target check: URLs without an explicit `sslmode` use `verify-full`, and insecure modes are rejected. Keep the same external owner connection in local `.env.render`'s `DATABASE_URL` / `DATABASE_MIGRATION_URL`; these are never the hosted runtime connection. An absent TLS setting previously caused Prisma P1010 even with a valid merchant/admin. Set the deployed HTTPS APP_BASE_URL before running the command; it is validated before a token is created.
+
 ### HTTPS webhook and public demo
 
 Register/update the existing Sandbox REST app's genuine webhook to `https://ACTUAL-SERVICE.onrender.com/api/paypal/webhook`, retain the existing supported event list and privately set the corresponding webhook ID on Render. Do not register a fabricated ID or treat simulator delivery as genuine. No deployment smoke creates/captures/refunds a payment. Free cold starts may delay webhook delivery; existing verification, deduplication and authenticated reconciliation remain authoritative. Phase 5's missing new delivery is not retroactively claimed as resolved.

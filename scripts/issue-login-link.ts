@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { scriptDatabase } from "./database";
 import { issueLoginToken } from "../src/server/services/auth";
-import { parseEnvironment } from "../src/lib/validation/env";
+import { parseEnvironment, requireDatabaseUrl } from "../src/lib/validation/env";
+import { renderOwnerUrl } from "./render-database";
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((arg) => {
@@ -18,14 +19,23 @@ if (!parsed.success) {
   );
   process.exit(1);
 }
-const db = scriptDatabase();
+let db: ReturnType<typeof scriptDatabase> | undefined;
 try {
+  // Hosted operator commands must use the same verified TLS/target configuration
+  // as migrations and deployment probes. Local development remains unchanged.
+  const configuredUrl = new URL(requireDatabaseUrl());
+  const origin = new URL(parseEnvironment(process.env).APP_BASE_URL).origin;
+  const hosted = configuredUrl.hostname.endsWith(".render.com");
+  if (hosted && !origin.startsWith("https://"))
+    throw new Error("Hosted sign-in requires the deployed HTTPS origin");
+  db = scriptDatabase(
+    hosted ? renderOwnerUrl().toString() : configuredUrl.toString(),
+  );
   const token = await issueLoginToken(
     db,
     parsed.data.merchant,
     parsed.data.email,
   );
-  const origin = new URL(parseEnvironment(process.env).APP_BASE_URL).origin;
   // Explicit local CLI credential handoff; never invoke this from an HTTP handler or CI logs.
   console.log(
     "Private single-use sign-in link (15 minutes). Do not share or commit:",
@@ -37,5 +47,5 @@ try {
   );
   process.exitCode = 1;
 } finally {
-  await db.$disconnect();
+  await db?.$disconnect();
 }
