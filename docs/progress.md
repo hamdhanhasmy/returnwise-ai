@@ -1,5 +1,13 @@
 # ReturnWise AI progress
 
+## 2026-11-12 — Phase 7 final hackathon release materials
+
+Prepared copy-ready Devpost content, a 2:50 / 354-word narrated video plan, full public/local judge instructions, actual sponsor evidence and unsent licence inquiry, $0 Neon continuity plan, submission checklist, refreshed README and four reviewed screenshots. No product, provider, schema, hosting-plan or database-cutover change. The public demo remains read-only; native local Studio and prior genuine provider evidence are clearly distinguished.
+
+Fresh checks passed: typecheck, zero-warning lint, Prisma validation/eight-migration status, production build, 158 unit, 107 isolated integration, 107 direct integration and 38 desktop/mobile browser tests (2.2 minutes, normal exit). Public HTTPS/clean browser/filter/case/auth checks and private bucket/access denial passed. Browser-bundle scan found no configured provider secrets in 33 assets; reachable-history audit checked 326 pre-release blobs/14 known current or retired values plus selected key patterns with no findings. Final staged-source recheck passed across 270 tracked files. Documentation validation found 69 valid local links. Reviewed public artifact was privately backed up with matching SHA-256; full hosted `pg_dump`/restore remains unperformed because matching client tools are not installed. No Neon resource, paid service, fresh AI request or payment/refund was created.
+
+AG Grid's actual hackathon post offers judging-period key support; public key/domain activation still awaits sponsor clarification and the fallback remains. YouTube/team links are explicitly placeholders at the user's request; recording, public upload and personal Devpost final submission are outstanding. The current Free DB expires 12 December, requiring an approved continuity rehearsal/cutover before expiry to cover judging through 15 December. No submission success or complete hosted mutation/provider journey is claimed. Details and exact remaining gates: [final release](phase-7-release.md), [checklist](submission-checklist.md).
+
 ## 2026-11-12 — judge “Try demo” entry
 
 Added a clear public homepage and “Try demo” buttons on homepage/sign-in, linking directly to the existing restricted dashboard. Files: `src/app/page.tsx`, `src/app/login/page.tsx`, existing public-demo browser coverage, README and decision/progress notes. No shared account, authentication bypass, database migration, provider call or financial permission change.

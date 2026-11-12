@@ -1,5 +1,7 @@
 # Sponsor integration evidence
 
+Final submission update (12 November): the sponsor's [official hackathon post](https://www.ag-grid.com/blog/build-a-payments-dashboard-without-building-a-dashboard/#whats-next-the-paypal-ai-hackathon) specifically offers judging-period licence-key support, superseding the earlier generic-trial-only assessment below. The public key/domain activation still needs clarification; no paid licence purchase or hosted gate bypass occurred. Current evidence, native local screenshots and a prepared (unsent) sponsor inquiry are in [sponsor-evidence.md](sponsor-evidence.md). Render is now genuinely deployed and verified; historical “no host selected” checkpoints below are preserved as history, not current status.
+
 Phase 7A hosting note: a locally validated Studio Pro AI trial expires 27 December 2026. General trial terms restrict use to internal evaluation, so public hosted Studio remains disabled pending confirmation for the hackathon domain. The public table fallback is explicitly ordinary HTML and is not claimed as AG Studio. Existing Phase 6 native Studio/Agent Framework code and genuine local DeepSeek evidence remain preserved. No new APIMatic work or sponsor eligibility is claimed during deployment preparation.
 
 ## Phase 6 — actual AG Studio integration, 2026-11-12

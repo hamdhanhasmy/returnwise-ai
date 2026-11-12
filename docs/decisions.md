@@ -1,5 +1,12 @@
 # Architecture decision log
 
+## Phase 7 — submission release boundaries
+
+- Freeze the working product and prepare accurate submission/video/local-judge evidence rather than add features or issue more provider operations. Publish only deliberately reviewed synthetic/sanitized screenshots. The read-only hosted snapshot and full local application have explicit different capabilities.
+- Treat the sponsor's hackathon-specific judging key support as the relevant new guidance; retain hosted licence gating until actual activation is clarified. Prepare an inquiry without sending it or buying a licence.
+- Document Neon Free as an approval-gated continuity candidate, not a provisioned/tested replacement. Preserve UTC, non-owner runtime grants, exact financial state and source backups; never run tests or an unreviewed restore against hosted data. A future cutover keeps the existing Render URL and requires rehearsal/rollback planning.
+- Audit configured current/retired secrets across tracked files and reachable Git history without logging matched values. Report the scanner's limits and manual submission gates instead of asserting universal security or a submitted entry.
+
 ## Phase 7A — strictly $0 hosted demo boundaries
 
 - The public homepage and merchant sign-in page offer “Try demo” as a direct link to the existing read-only `/demo`. It does not issue a session or bypass merchant authorization. The homepage observes the public-demo flag at request time; when disabled, normal authenticated dashboard routing is preserved.

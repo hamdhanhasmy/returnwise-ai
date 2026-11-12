@@ -1,20 +1,86 @@
 # ReturnWise AI
 
-Judges can open the [homepage](https://returnwise-ai-t6sv.onrender.com) and choose **Try demo** to enter the restricted dashboard immediately, without an account or sign-in link. The same button is available on Merchant sign-in. The demo grants no merchant permissions and performs no new AI or payment operations.
+**Explainable return decisions. Human approval. Verified PayPal refunds.**
 
-**Public judge demo:** [ReturnWise AI on Render](https://returnwise-ai-t6sv.onrender.com/demo). HTTPS, desktop/mobile exploration, secure merchant sign-in and persistence across an actual Render restart were verified on 12 November 2026. Free services can take time to wake. Follow the [strictly $0 Render/Supabase runbook](docs/phase-7a-deployment.md) for settings and limitations. `/demo` is a read-only published snapshot, separate from merchant accounts and the hosted ledger; it makes no AI or PayPal calls. Keep local `.env` and hosted operator `.env.render` separate; never run tests or development fixture seeds against the hosted database. AG Studio public permission remains unresolved, so the public view uses an explicitly labeled ordinary-table fallback. Hosted customer upload, new AI inference and webhook delivery have not been verified; genuine private Supabase storage and restart persistence have.
+[Try the public demo](https://returnwise-ai-t6sv.onrender.com) · [Judge setup](docs/judge-setup.md) · [Demo walkthrough](docs/phase-5-demo.md) · [Sponsor evidence](docs/sponsor-evidence.md) · [Release checks](docs/phase-7-release.md)
 
-A sandbox-only merchant workspace for careful return resolution. Phase 2.5 verified a genuine $1.00 capture, $0.40 + $0.60 refunds and authenticated webhooks. Phase 3 adds private customer intake, versioned policies and integer economics; Phase 4 adds consent-based private images and budget-controlled DeepSeek observations. Phase 5 verified a new $5.00 Sandbox capture → synthetic customer evidence → genuine DeepSeek assessment → human review/approval → $5.00 completed refund → closed case. Phase 6 adds native AG Studio analytics with interactive reports and a bounded, read-only DeepSeek analytics runner. AI cannot approve or price remedies; a separate final merchant confirmation executes the exact approved refund. Automated mocks and synthetic scenarios are separate from genuine provider operations.
+A damaged product can cost more to return and inspect than a merchant can recover from it. ReturnWise brings private customer evidence, merchant policy, explicit financial assumptions and verified payment state into one careful return-resolution workflow. AI supplies observations and uncertainty; deterministic rules calculate eligible options; a human authorizes the exact remedy.
 
-Open **Analytics** at `/analytics` after signing in. Explore Return overview, Economics lab and Case explorer, filter source/category/time, customize Studio widgets and save the layout for your merchant in this browser session. Verified Sandbox refund totals and configured/modelled economics have distinct labels. Charts cover up to 500 recent cases; the case list paginates all matching records. Historical untrusted dates are excluded from trends. Mobile reports support charts, filters, grids and case navigation; layout editing and the optional native assistant require a desktop-sized window. See [Phase 6 architecture, metrics, privacy and verification](docs/phase-6-analytics.md).
+## Try it as a judge
 
-The optional native Studio assistant requires an administrator, configured `AI_ENABLED=true`/`DEEPSEEK_API_KEY` and the explicit on-page question-processing consent. Choose **Open AI assistant** to open Studio's edit-mode assistant panel. Each standalone question uses at most one bounded tool-selection request under the existing shared cap; exact aggregate answers come from the server. Questions are not stored in plaintext and no photographs/customer records are sent. Do not enter personal data. CI disables provider credentials. Local AG Studio evaluation works without a licence; hosted use requires an appropriate trial/commercial Studio licence including AI entitlement. Configure `NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY` privately and rebuild; this vendor browser entitlement is intentionally public, while DeepSeek/PayPal API secrets remain server-side. The project MIT licence does not relicense commercial dependencies.
+Open **https://returnwise-ai-t6sv.onrender.com** and choose **Try demo**. No sign-in or credentials are needed. Explore fictional return cases, filter source/category/time, compare configured economics, and inspect the published genuine DeepSeek assessment and sanitized completed PayPal Sandbox history.
 
-Follow the [Phase 5 demo walkthrough](docs/phase-5-demo.md) and [orchestration/security report](docs/phase-5-orchestration.md). `npm.cmd run demo:setup` prepares a fictional $5 product and versioned demonstration policy without making provider requests. It never purchases or refunds automatically. The historical $1 capture is fully refunded and must not be reused.
+**The hosted judge demo is read-only.** It uses reviewed published snapshots, separate from the hosted payment ledger. It does not submit new returns, upload customer evidence, call paid AI or issue refunds. The full application is reproducible locally with [complete setup and provider prerequisites](docs/judge-setup.md). A fresh seed never fabricates successful provider records. Free cold starts may take time.
 
-Start with local setup below, then follow the [PayPal Sandbox runbook](docs/paypal-sandbox.md) or [Phase 3 return-management guide](docs/return-management.md). See [genuine Sandbox evidence](docs/phase-2.5-verification.md) and [Phase 3 verification](docs/phase-3-verification.md).
+| Capability | Public judge demo | Full local application |
+| --- | --- | --- |
+| Case exploration and financial comparison | Sanitized fictional/published snapshots | Authenticated persisted cases and versioned policies |
+| DeepSeek evidence observations | Previously stored genuine synthetic-image result | Private upload, consent and budgeted analysis with configured credentials |
+| PayPal history | Published completed Sandbox references | Official buyer approval, verified capture, exact authorized refund and reconciliation |
+| AG Studio | Labeled ordinary-table fallback pending hackathon key/domain activation | Actual Studio 3.1.0 charts, grids, layouts and native read-only agent |
+| Customer submission / merchant actions | Unavailable | Scoped expiring links, human review, exact acceptance/approval and audit trail |
 
-For optional image analysis, follow the [DeepSeek setup, privacy and verification guide](docs/phase-4-deepseek.md) and [measured synthetic evaluation](docs/deepseek-evaluation.md). Privately configure `DEEPSEEK_API_KEY`, `AI_ENABLED=true` and `AI_SPENDING_CAP_USD=0.25` in `.env`, apply migrations, then restart the app. No OpenAI key is needed. Existing cases show **Open evidence workspace**; customers upload and consent separately, and an authenticated merchant explicitly requests analysis. Human review remains mandatory.
+## See the product
+
+![Public homepage with Try demo entry](docs/images/public-home.png)
+*Public HTTPS homepage: judges enter without an administrator link.*
+
+![Actual local AG Studio charts and grids](docs/images/ag-studio-local.png)
+*Actual local AG Studio 3.1.0; verified Sandbox amounts and modeled economics are separate. This is not the public table fallback.*
+
+[Stored assessment and verified-case screenshot](docs/images/public-case.png) · [Genuine cached native Studio assistant](docs/images/ag-studio-agent-local.png). Screenshot provenance and privacy review: [image index](docs/images/README.md).
+
+## How it works
+
+1. Customer access is order-scoped and expiring. Evidence images are validated, normalized and stored privately, with separate consent before DeepSeek processing.
+2. DeepSeek Flash vision returns strict Zod-validated observations, uncertainty and missing information. It cannot set a price, interpret entitlement conclusively, approve a case or call PayPal.
+3. The deterministic engine evaluates immutable policy/input snapshots with integer currency minor units. For equivalent full remedies: **physical-return cost = refund + shipping + handling/disposal − estimated recovery**. Missing or unreliable inputs route to manual review; partial offers require exact customer agreement.
+4. A merchant reviews the evidence and exact terms. Final financial authorization is separate from approving a resolution; physical returns require receipt where applicable.
+5. Existing PayPal Orders v2/Payments v2 services reserve the exact refund, use persistent request IDs, verify provider status and reconcile uncertainty. A case closes only after verified completion and a reconciled ledger.
+
+The original three synthetic scenarios yield two comparable full remedies and one manual review: **$178 physical-return baseline versus $165 selected cost = $13 modeled cost avoidance**. This is not measured merchant revenue or savings. The separate $5 demo case contributes a further configured $2.75 comparison; the all-source $15.75 dashboard must not be presented as the original three-scenario result.
+
+## Architecture
+
+~~~mermaid
+flowchart LR
+  Customer[Scoped customer portal] --> App[Next.js server services]
+  Merchant[Authenticated merchant] --> App
+  App --> DB[(Prisma / PostgreSQL)]
+  App --> Storage[Private evidence storage]
+  App --> AI[DeepSeek observations only]
+  AI --> Review[Deterministic policy and economics / human review]
+  Review --> App
+  App --> PayPal[PayPal Sandbox capture / refund / reconciliation]
+  DB --> Projection[Tenant-scoped read-only analytics]
+  Projection --> Studio[AG Studio reports and bounded native agent]
+~~~
+
+Single Next.js App Router application; strict TypeScript, React, Tailwind/shadcn, PostgreSQL, Prisma, Zod, Vitest and Playwright. Detailed [architecture](docs/architecture.md), [financial orchestration](docs/phase-5-orchestration.md), [return management](docs/return-management.md).
+
+## Genuine verification and sponsor integrations
+
+- **PayPal Sandbox:** independently verified $1 capture → $0.40 + $0.60 refunds, authenticated genuine webhooks; separate **$5 capture → genuine DeepSeek assessment → human review/approval → $5 completed refund → closed case**. Both captures are fully refunded. Do not reuse them. [Phase 2.5](docs/phase-2.5-verification.md), [Phase 5](docs/phase-5-orchestration.md).
+- **DeepSeek:** consent-based private image observations, durable deduplication/cache, shared spending reservations, bounded requests and persistent usage/cost. Twenty synthetic evaluation requests cost an estimated $0.006344082, with 20 cached repeats; this does not establish real-photo accuracy. [Evidence/AI guide](docs/phase-4-deepseek.md), [evaluation](docs/deepseek-evaluation.md).
+- **AG Studio 3.1.0:** native charts/grids/filtering/editable reports plus Agent Framework custom DeepSeek runner. One genuine analytics tool selection used 589 input / 17 output tokens, estimated $0.0001971; exact $6.00 Sandbox refund aggregate was server-computed and a repeat was cached. The [sponsor hackathon post](https://www.ag-grid.com/blog/build-a-payments-dashboard-without-building-a-dashboard/#whats-next-the-paypal-ai-hackathon) offers judging-period key support. Public activation remains pending; the genuine local implementation is preserved. [Sponsor evidence/inquiry](docs/sponsor-evidence.md), [Phase 6](docs/phase-6-analytics.md).
+- **APIMatic:** installed PayPal Context Plugin 0.4.1 informed durable-intent/retry/error review and a concrete outbound-call persistence regression. Existing REST adapter retained; no generated SDK claim. [Provenance](docs/sponsor-integrations.md).
+- **Render / Supabase:** Free HTTPS Node service and Free PostgreSQL, restricted DB role, private JPEG-only Supabase bucket, durable storage quota and actual restart-persistence verification. No paid hosting/disks/upgrades. [Deployment settings](docs/phase-7a-deployment.md).
+
+## Security, privacy and limits
+
+Tenant-scoped queries, hashed expiring capabilities, exact-origin mutations, Secure/HttpOnly production sessions, append-only audit history, integer money, exact offer versions, durable financial reservations and verified webhooks protect the workflow. Evidence is private; browser code receives no privileged storage/provider credentials. DeepSeek spend is reserved server-side, including concurrent work, and cached results avoid repeated charges. Manual review remains available when AI/data/policy is insufficient.
+
+Sandbox-only prototype: no real funds, paying customers, measured business savings or legal certification. Historical pre-fix timestamps remain conservatively flagged. Shared ingress limits, retention operations, real-photo evaluation and independent security review remain production work. Hosted customer upload/new AI/webhook delivery are not claimed verified. Current Render DB expires **12 December 2026**, before judging finishes; follow the **[strictly $0 continuity plan](docs/database-continuity.md)** before expiry. No Neon migration or paid renewal has happened.
+
+## Submission and reproducibility
+
+- [Copy-ready Devpost description](docs/devpost-submission.md)
+- [2:50 video script, recording order and YouTube description](docs/demo-video-script.md)
+- [Submission checklist and remaining manual actions](docs/submission-checklist.md)
+- [Final release commands, test results and security checks](docs/phase-7-release.md)
+- [Environment-variable template](.env.example): keep actual credentials in ignored local/operator files; do not publish them as judge access.
+
+Public source: https://github.com/hamdhanhasmy/returnwise-ai. **MIT [LICENSE](LICENSE)** covers project code; dependencies, commercial AG Studio entitlement and bundled PostgreSQL retain their own terms. **YouTube: [REQUIRED PUBLIC VIDEO URL — add before submission].** The project has not been submitted to Devpost by this repository.
 
 ## Requirements
 
