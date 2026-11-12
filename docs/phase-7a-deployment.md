@@ -119,6 +119,13 @@ Open the resulting one-use 15-minute fragment link privately, never in shared CI
 
 The login issuer now reuses the hosted operator TLS/target check: URLs without an explicit `sslmode` use `verify-full`, and insecure modes are rejected. Keep the same external owner connection in local `.env.render`'s `DATABASE_URL` / `DATABASE_MIGRATION_URL`; these are never the hosted runtime connection. An absent TLS setting previously caused Prisma P1010 even with a valid merchant/admin. Set the deployed HTTPS APP_BASE_URL before running the command; it is validated before a token is created.
 
+To avoid entering an email that differs from the account created during bootstrap, omit `--email` and the CLI uses the private `HOSTED_ADMIN_EMAIL` already in `.env.render`. It still verifies that the configured email belongs to an active user of the specified merchant; it never creates or renames an account.
+
+```powershell
+$env:APP_BASE_URL = 'https://returnwise-ai-t6sv.onrender.com'
+node --env-file=.env.render --import tsx scripts/issue-login-link.ts --merchant=01c31800-4f91-45c0-a583-f923be5c4889
+```
+
 ### HTTPS webhook and public demo
 
 Register/update the existing Sandbox REST app's genuine webhook to `https://ACTUAL-SERVICE.onrender.com/api/paypal/webhook`, retain the existing supported event list and privately set the corresponding webhook ID on Render. Do not register a fabricated ID or treat simulator delivery as genuine. No deployment smoke creates/captures/refunds a payment. Free cold starts may delay webhook delivery; existing verification, deduplication and authenticated reconciliation remain authoritative. Phase 5's missing new delivery is not retroactively claimed as resolved.

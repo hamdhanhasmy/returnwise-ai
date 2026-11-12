@@ -1,5 +1,9 @@
 # ReturnWise AI progress
 
+## 2026-11-12 — configured hosted admin login
+
+A subsequent manual command connected successfully after the TLS fix but supplied an email different from the bootstrapped hosted account. Read-only identity comparison confirmed the configured HOSTED_ADMIN_EMAIL matches the active database admin; no account was changed. The operator CLI now uses that configured email when --email is omitted and reports an account mismatch clearly without exposing identities or credentials. The actual hosted CLI with omitted email succeeded, with the resulting link saved only to the ignored private operator file. Typecheck/lint, 158 unit and 107 isolated integration tests passed. No deployment, financial or AI operation was needed.
+
 ## 2026-11-12 — hosted operator login TLS correction
 
 The documented operator login command failed with Prisma P1010 when its stored external Render URL omitted sslmode. Read-only comparison verified that the same target succeeds through established TLS normalization and that the configured merchant/admin exists. The login CLI now reuses `renderOwnerUrl` for hosted operator connections, requires HTTPS and validates configuration before issuing a token; local login behavior remains unchanged. No hosted application redeployment or database migration is required. Typecheck/lint, 158 unit and 107 isolated integration tests passed. The corrected actual CLI generated a hosted one-use link, captured only in an ignored private local file; no token/URL was printed in tool output, and no financial/AI request occurred.

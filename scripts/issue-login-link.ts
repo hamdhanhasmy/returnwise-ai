@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { scriptDatabase } from "./database";
 import { issueLoginToken } from "../src/server/services/auth";
-import { parseEnvironment, requireDatabaseUrl } from "../src/lib/validation/env";
+import {
+  parseEnvironment,
+  requireDatabaseUrl,
+} from "../src/lib/validation/env";
 import { renderOwnerUrl } from "./render-database";
 
 const args = Object.fromEntries(
@@ -12,7 +15,7 @@ const args = Object.fromEntries(
 );
 const parsed = z
   .object({ email: z.email(), merchant: z.uuid() })
-  .safeParse(args);
+  .safeParse({ ...args, email: args.email ?? process.env.HOSTED_ADMIN_EMAIL });
 if (!parsed.success) {
   console.error(
     "Usage: npm run auth:link -- --email=admin@example.invalid --merchant=<merchant-uuid>",
@@ -41,9 +44,12 @@ try {
     "Private single-use sign-in link (15 minutes). Do not share or commit:",
   );
   console.log(`${origin}/login#token=${token}`);
-} catch {
+} catch (error) {
   console.error(
-    "Could not issue a sign-in link. Verify the merchant/user and database setup.",
+    error instanceof Error &&
+      error.message === "No active user matches that merchant and email"
+      ? "No active account matches that email and merchant. Use the configured HOSTED_ADMIN_EMAIL (omit --email), or an existing merchant user's email."
+      : "Could not issue a sign-in link. Verify the merchant/user and database setup.",
   );
   process.exitCode = 1;
 } finally {
